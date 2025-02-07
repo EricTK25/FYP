@@ -67,7 +67,14 @@ function App() {
       {/* Navbar */}
       <div className="navbar">
         <span className="app-title">Vehicle App</span>
-        <button className="connect-wallet">Connect Wallet</button>
+        <Link to="/mint">Mint</Link>
+        <Link to="/my-tokens">My Tokens</Link>
+        
+        {account ? (
+          <span>Connected: {account.slice(0,6)}...{account.slice(-4)}</span>
+        ) : (
+          <button className="connect-wallet" onClick={connectWallet}>Connect Wallet</button>
+        )}
       </div>
 
       {/* The car and men  */}
@@ -88,21 +95,10 @@ function App() {
               <p>${car.price}</p>
               <button className="add-to-cart">purchase</button>
             </div>
+            
           ))
         )}
       </div>
-
-      <nav>
-        <Link to="/mint">Mint</Link>
-        <Link to="/my-tokens">My Tokens</Link>
-        
-        {account ? (
-          <span>Connected: {account.slice(0,6)}...{account.slice(-4)}</span>
-        ) : (
-          <button onClick={connectWallet}>Connect Wallet</button>
-        )}
-        <p>{account}</p>
-      </nav>
 
       {/* Footer */}
       <footer className="footer-nav">

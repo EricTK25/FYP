@@ -23,6 +23,7 @@ export function EthereumProvider({ children }) {
       });
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
+      
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS,
         CarrierTokenABI,
