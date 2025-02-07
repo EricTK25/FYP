@@ -29,6 +29,18 @@ const router = createBrowserRouter([
   {
     path: "/transactions/:tokenId",
     element: <Transactions />
+  },
+  {
+    path: "/Regis",
+    element: <Regis />
+  },
+  {
+    path: "/ProfileP",
+    element: <ProfileP />
+  },
+  {
+    path: "/Search",
+    element: <Search />
   }
 ]);
 
