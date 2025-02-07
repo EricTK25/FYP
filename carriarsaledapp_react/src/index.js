@@ -4,6 +4,8 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { MyTokens, MintToken, TokenDetail, Transactions} from './pages';
+import { EthereumProvider } from './EthereumContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -11,12 +13,30 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />
+  },
+  {
+    path: "/my-tokens",
+    element: <MyTokens />
+  },
+  {
+    path: "/mint",
+    element: <MintToken />
+  },
+  {
+    path: "/token/:tokenId",
+    element: <TokenDetail />
+  },
+  {
+    path: "/transactions/:tokenId",
+    element: <Transactions />
   }
 ]);
 
 root.render(
   <React.StrictMode>
+    <EthereumProvider>
       <RouterProvider router={router} />
+    </EthereumProvider>
   </React.StrictMode>
 );
 

@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
 contract CarrierToken is ERC721URIStorage, Ownable{
-    uint256 private _tokenIds;
+    uint256 private _tokenIds = 0;
     struct Carrier {
         address owner;
         string carrierName;
