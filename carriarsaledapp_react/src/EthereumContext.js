@@ -34,13 +34,26 @@ export function EthereumProvider({ children }) {
       setContract(contract);
       setAccount(accounts[0]);
 
-      loadTokens(contract, signer);
+      const mintTestToken = async (acc,contract) =>{
+        const carrier = {
+          owner: acc,
+          carrierName: "Global Carrier",
+          carrierType: "Air",
+          registrationNumber: "GC123",
+          price: ethers.parseEther("1.0"),
+          year: 2023,
+          txSucCount: 0,
+        };
+        await contract.mintToken(carrier);
+      }
+      await mintTestToken(accounts[0],contract);
+      loadTokens(contract);
     } catch (error) {
       console.error("Error connecting wallet:", error);
     }
   };
 
-  const loadTokens = async (contract, signer) => {
+  const loadTokens = async (contract) => {
     try {
       const totalSupply = await contract.getTokenIds();
       const tokens = [];
@@ -53,7 +66,7 @@ export function EthereumProvider({ children }) {
           name: carrier.carrierName,
           type: carrier.carrierType,
           price: ethers.formatEther(carrier.price),
-          year: carrier.year
+          year: Number(carrier.year)
         });
       }
 

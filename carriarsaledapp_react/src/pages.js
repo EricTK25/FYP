@@ -2,12 +2,12 @@ import React from 'react';
 import { useEthereum } from './EthereumContext';
 
 export function MyTokens() {
-    const { contract, account, allTokens } = useEthereum();
+    const { allTokens } = useEthereum();
 
     return (
         <div className="MyTokens">
             <h1>MyTokens</h1>
-            <p>{account}</p>
+            <p>{JSON.stringify(allTokens)}</p>
         </div>
     );
 }

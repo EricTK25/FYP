@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat");
-const { JsonRpcProvider, getAddress } = require("ethers");
+const { JsonRpcProvider } = require("ethers");
 
 const provider = new JsonRpcProvider();
 const signer = provider.getSigner();
