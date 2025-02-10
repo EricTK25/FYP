@@ -69,7 +69,7 @@ export function MintToken() {
           year: new Date().getFullYear()
         });
         
-        alert('Carrier created successfully!');
+        alert('Carrier Token created successfully!');
       } catch (err) {
         console.error('Contract call failed:', err);
         setError(err.message || 'Failed to create carrier');

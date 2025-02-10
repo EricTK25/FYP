@@ -11,7 +11,10 @@
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1",
     "web-vitals": "^4.2.4",
-    "web3": "^4.16.0"
+    "web3": "^4.16.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.2.0",
+    "hardhat": "^2.22.18"
   },
   "scripts": {
     "start": "react-scripts start",
