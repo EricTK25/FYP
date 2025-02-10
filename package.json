@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.2.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
     "cra-template": "1.2.0",
     "dotenv": "^16.4.7",
     "ethers": "^6.13.5",
@@ -12,9 +17,12 @@
     "react-scripts": "5.0.1",
     "web-vitals": "^4.2.4",
     "web3": "^4.16.0",
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@openzeppelin/contracts": "^5.2.0",
-    "hardhat": "^2.22.18"
+    "hardhat": "^2.22.18",
+    "CarrierApp": "file:",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.12.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -39,5 +47,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+<<<<<<< HEAD
+=======
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "hardhat": "^2.12.2"
+>>>>>>> HenryCode/main
   }
 }
