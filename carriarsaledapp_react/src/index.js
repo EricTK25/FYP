@@ -7,7 +7,7 @@ import ProfileP from "./ProfileP";
 import Search from "./Search";
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { MyTokens, MintToken, TokenDetail, Transactions} from './pages';
+import { AllTokens, MintToken, TokenDetail, Transactions} from './pages';
 import { EthereumProvider } from './EthereumContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -18,8 +18,8 @@ const router = createBrowserRouter([
     element: <App />
   },
   {
-    path: "/my-tokens",
-    element: <MyTokens />
+    path: "/allTokens",
+    element: <AllTokens />
   },
   {
     path: "/mint",

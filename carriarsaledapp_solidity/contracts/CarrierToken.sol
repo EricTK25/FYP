@@ -20,9 +20,7 @@ contract CarrierToken is ERC721URIStorage, Ownable{
     mapping(uint256 => Carrier) public tokenId2Carrier;
     mapping(uint256 => mapping(uint256 => address)) public tokenTxRecord;
 
-    constructor() ERC721("CarrierToken", "crr") Ownable(msg.sender){
-        _tokenIds = 0;
-    }
+    constructor() ERC721("CarrierToken", "crr") Ownable(msg.sender){}
 
     function _baseURI() internal pure override returns (string memory) {
         return "https://app.GlobalCarrierSale/token/";
@@ -49,7 +47,7 @@ contract CarrierToken is ERC721URIStorage, Ownable{
         approve(operator, tokenId);
     }
 
-    function getTokenIds() public returns(uint256) {
+    function getTokenIds() public view returns(uint256) {
         return _tokenIds;
     }
 

@@ -68,7 +68,7 @@ function App() {
       <div className="navbar">
         <span className="app-title">Vehicle App</span>
         <Link to="/mint">Mint</Link>
-        <Link to="/my-tokens">My Tokens</Link>
+        <Link to="/allTokens">AllTokens</Link>
         
         {account ? (
           <span>Connected: {account.slice(0,6)}...{account.slice(-4)}</span>

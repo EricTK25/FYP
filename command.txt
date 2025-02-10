@@ -1,3 +1,4 @@
+npx hardhat compile
 npx hardhat node
 npx hardhat run --network localhost deploy\deployCarrierToken.js
 npm start
