@@ -71,28 +71,6 @@ function App() {
       },
     ];
 
-    const togglePop = (item) => {
-      setItem(item)
-      toggle ? setToggle(false) : setToggle(true)
-    }
-    
-    const loadBlockchainData = async () => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      setProvider(provider)
-      const network = await provider.getNetwork()
-      const carrierapp = new ethers.Contract(config[network.chainId].CarrierApp.address, CarrierApp, provider)
-      setCarrierApp(carrierapp)
-      console.log(carrierapp.address)
-      const items = []
-      for (var i = 0; i < 9; i++) {
-        const item = await carrierapp.items(i+1)
-        items.push(item)
-      }
-  
-      const cars = items.filter((item) => item.category === 'Car')
-      setCars(cars)
-    }
-
     // Simulate delay (e.g., blockchain call)
     setTimeout(() => {
       setCars(carData);
@@ -100,9 +78,34 @@ function App() {
     }, 2000);
   };
 
+  const togglePop = (item) => {
+    setItem(item)
+    toggle ? setToggle(false) : setToggle(true)
+  }
+  
+  const loadBlockchainData = async () => {
+    const provider = new ethers.BrowserProvider(window.ethereum)
+    setProvider(provider)
+    const network = await provider.getNetwork()
+    const carrierapp = new ethers.Contract(config[network.chainId].CarrierApp.address, CarrierApp, provider)
+    setCarrierApp(carrierapp)
+    console.log(await carrierapp.items(0))
+    const items = []
+    for (var i = 0; i < 9; i++) {
+      const item = await carrierapp.items(i+1)
+      items.push(item)
+    }
+
+    const car = items.filter((item) => item.category === 'Car')
+    setCar(car)
+  }
+
   useEffect(() => {
     fetchCars();
-    loadBlockchainData()
+  }, []);
+
+  useEffect(() => {
+    loadBlockchainData();
   }, []);
 
   return (
@@ -128,7 +131,7 @@ function App() {
       <div>
         <Navigation account={acc} setAccount={setAccount} />
         <h2>Vehicle App Best Sellers</h2>
-        {cars &&(
+        {car &&(
           <Section title={"Car"} items={car} togglePop={togglePop} />
         )}
         {toggle && (
@@ -149,7 +152,6 @@ function App() {
               <p>${car.price}</p>
               <button className="add-to-cart">purchase</button>
             </div>
-            
           ))
         )}
       </div>

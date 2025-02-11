@@ -17,11 +17,11 @@ async function main() {
   try {
     carrierapp = await hre.ethers.getContractAt("CarrierApp", targetAddress);
     const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '123456',
-      database: 'carriersaledapp',
-      port: '3306'
+      host: '',
+      user: '',
+      password: '',
+      database: '',
+      port: ''
     });
 
     const [rows] = await connection.execute('SELECT * FROM carrierlist');
