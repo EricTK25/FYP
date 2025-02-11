@@ -4,7 +4,7 @@ const fs = require('fs');
 const config = require('../src/config.json');
 
 const tokens = (n) => {
-  return ethers.utils.parseUnits(n.toString(), 'ether');
+  return ethers.parseUnits(n.toString(), 'ether');
 }
 
 async function main() {
@@ -17,11 +17,11 @@ async function main() {
   try {
     carrierapp = await hre.ethers.getContractAt("CarrierApp", targetAddress);
     const connection = await mysql.createConnection({
-      host: '',
-      user: '',
-      password: '',
-      database: '',
-      port: 
+      host: 'localhost',
+      user: 'root',
+      password: '123456',
+      database: 'carriersaledapp',
+      port: '3306'
     });
 
     const [rows] = await connection.execute('SELECT * FROM carrierlist');
