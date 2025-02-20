@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 const mysql = require('mysql2/promise');
-const fs = require('fs');
 const config = require('../src/config.json');
+const fs = require('fs');
 
 const tokens = (n) => {
   return ethers.parseUnits(n.toString(), 'ether');
@@ -12,16 +12,20 @@ async function main() {
   const networkId = "31337"; 
   const targetAddress = config[networkId]?.CarrierApp?.address;
 
-  let carrierapp;
-
   try {
-    carrierapp = await hre.ethers.getContractAt("CarrierApp", targetAddress);
+    console.log("Target Address from Config:", targetAddress);
+    console.log("Deploying CarrierApp contract...");
+    let CarrierApp = await ethers.getContractFactory("CarrierApp");
+    let carrierapp = await CarrierApp.deploy();
+    await carrierapp.waitForDeployment();
+    config[networkId] = { CarrierApp: { address: await carrierapp.getAddress() } };
+    fs.writeFileSync('../FYP/src/config.json', JSON.stringify(config, null, 2));
     const connection = await mysql.createConnection({
-      host: '',
-      user: '',
-      password: '',
-      database: '',
-      port: ''
+       host: "localhost",
+       user: "root",
+       password: "root",
+       database: "fypproject",
+       port: 3306
     });
 
     const [rows] = await connection.execute('SELECT * FROM carrierlist');
@@ -29,10 +33,9 @@ async function main() {
 
     for (let i = 0; i < rows.length; i++) {
       const item = rows[i];
-      console.log(`Processing item ${i}:`, item); 
-      if (item.product_id === undefined || item.product_name === undefined || 
-          item.product_category === undefined || item.product_image === undefined || 
-          item.cost === undefined || item.stock === undefined) {
+      console.log(`Processing item ${i}:`, item);
+      if (!item.product_id || !item.product_name || !item.product_category ||
+          !item.product_image || item.cost === undefined || item.stock === undefined) {
         console.error(`Missing fields in row ${i}:`, item);
         continue; 
       }

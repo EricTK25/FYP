@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-
+import "../App.css"; 
 const Section = ({ title, items, togglePop }) => {
     return (
         <div className='cards__section'>
@@ -11,7 +11,7 @@ const Section = ({ title, items, togglePop }) => {
                 {items.map((item, index) => (
                     <div className='card' key={index} onClick={() => togglePop(item)}>
                         <div className='card__image'>
-                            <img src={item.image} alt="Item" />
+                            <img src={item.image} alt="Product" />
                         </div>
                         <div className='card__info'>
                             <h4>{item.name}</h4>

@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
 import Regis from "./Regis";
 import ProfileP from "./ProfileP";
 import Search from "./Search";
 import reportWebVitals from './reportWebVitals';
+import Buy from './Buy';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AllTokens, MintToken, TokenDetail, Transactions} from './pages';
 import { EthereumProvider } from './EthereumContext';
@@ -44,6 +44,10 @@ const router = createBrowserRouter([
   {
     path: "/Search",
     element: <Search />
+  },
+  {
+    path: "/Buy",
+    element: <Buy/>
   }
 ]);
 

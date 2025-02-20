@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
 import { ethers } from 'ethers'
 import "./App.css"; // Make sure to create a CSS file for styling
 
 // Components
 import Navigation from './components/Navigation'
+import HeroSection from "./components/HeroSection";
 import Section from './components/Section'
 import Product from './components/Product'
 
@@ -16,16 +16,9 @@ import config from './config.json'
 import { useEthereum } from './EthereumContext';
 
 function App() {
-  const { account, connectWallet } = useEthereum();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [provider, setProvider] = useState(null)
-  const [carrierapp, setCarrierApp] = useState(null)
   const [acc, setAccount] = useState(null)
-  const [car, setCar] = useState(null)
-  const [item, setItem] = useState({})
-  const [toggle, setToggle] = useState(false)
 
   // Simulate fetching car data based on tokenId
   const fetchCars = async () => {
@@ -78,67 +71,17 @@ function App() {
     }, 2000);
   };
 
-  const togglePop = (item) => {
-    setItem(item)
-    toggle ? setToggle(false) : setToggle(true)
-  }
-  
-  const loadBlockchainData = async () => {
-    const provider = new ethers.BrowserProvider(window.ethereum)
-    setProvider(provider)
-    const network = await provider.getNetwork()
-    const carrierapp = new ethers.Contract(config[network.chainId].CarrierApp.address, CarrierApp, provider)
-    setCarrierApp(carrierapp)
-    console.log(await carrierapp.items(0))
-    const items = []
-    for (var i = 0; i < 9; i++) {
-      const item = await carrierapp.items(i+1)
-      items.push(item)
-    }
-
-    const car = items.filter((item) => item.category === 'Car')
-    setCar(car)
-  }
 
   useEffect(() => {
     fetchCars();
   }, []);
 
-  useEffect(() => {
-    loadBlockchainData();
-  }, []);
-
   return (
     <div className="App">
       {/* Navbar */}
-      <div className="navbar">
-        <span className="app-title">Vehicle App</span>
-        <Link to="/mint">Mint</Link>
-        <Link to="/allTokens">AllTokens</Link>
-        
-        {account ? (
-          <span>Connected: {account.slice(0,6)}...{account.slice(-4)}</span>
-        ) : (
-          <button className="connect-wallet" onClick={connectWallet}>Connect Wallet</button>
-        )}
-      </div>
-
-      {/* The car and men  */}
-      <div className="hero-section">
-      <img src="/homecar.png" alt="My Description" />
-      </div>
-
-      <div>
-        <Navigation account={acc} setAccount={setAccount} />
-        <h2>Vehicle App Best Sellers</h2>
-        {car &&(
-          <Section title={"Car"} items={car} togglePop={togglePop} />
-        )}
-        {toggle && (
-          <Product item={item} provider={provider} account={account} carrierapp={carrierapp} togglePop={togglePop} />
-        )}
-      </div>
-
+      <Navigation account={acc} setAccount={setAccount} />
+      {/* Hero Section  */}
+      <HeroSection/>
       {/* Top Sellers Section */}
       <h2 className="section-title">TOP SELLERS</h2>
       <div className="car-list">
