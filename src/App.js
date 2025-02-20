@@ -3,10 +3,9 @@ import { ethers } from 'ethers'
 import "./App.css"; // Make sure to create a CSS file for styling
 
 // Components
-import Navigation from './components/Navigation'
+import Navigation from './components/Navigation';
 import HeroSection from "./components/HeroSection";
-import Section from './components/Section'
-import Product from './components/Product'
+import FooterNavigation from "./components/FooterNavigation";
 
 // ABIs
 import CarrierApp from './abis/CarrierApp.json'
@@ -18,7 +17,7 @@ import { useEthereum } from './EthereumContext';
 function App() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [acc, setAccount] = useState(null)
+  const [acc, setAccount] = useState(null);
 
   // Simulate fetching car data based on tokenId
   const fetchCars = async () => {
@@ -100,15 +99,7 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer className="footer-nav">
-        <nav className="nav-bar">
-          <button className="nav-item"onClick={'/'}>Home</button>
-          <button className="nav-item"onClick={'/Search'}>Search</button>
-          <button className="nav-item">Sell</button>
-          <button className="nav-item">Cart</button>
-          <button className="nav-item"onClick={'ProfileP'}>Profile</button>
-        </nav>
-      </footer>
+      <FooterNavigation></FooterNavigation>
     </div>
   );
 }

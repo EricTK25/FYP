@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
 contract CarrierApp {
@@ -13,7 +12,7 @@ contract CarrierApp {
         uint256 stock;
     }
 
-    struct Order{
+    struct Order {
         uint256 time;
         Item item;
     }
@@ -25,10 +24,11 @@ contract CarrierApp {
     event Buy(address buyer, uint256 orderId, uint256 itemId);
     event List(string name, uint256 cost, uint quantity);
 
-    modifier onlyOwner(){
-        require(msg.sender == owner);
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not the contract owner");
         _;
     }
+
     constructor() {
         owner = msg.sender;
     }
@@ -40,7 +40,7 @@ contract CarrierApp {
         string memory _image,
         uint256 _cost,
         uint256 _stock
-    ) public onlyOwner{
+    ) public onlyOwner {
         Item memory item = Item(
             _id, 
             _name,
@@ -55,19 +55,26 @@ contract CarrierApp {
         emit List(_name, _cost, _stock);
     }
 
-    function buy(uint256 _id) public payable{
+    function buy(uint256 _id) public payable {
         Item memory item = items[_id];
-        require(msg.value >= item.cost);
-        require(item.stock>0);
+        require(msg.value >= item.cost, "Insufficient payment");
+        require(item.stock > 0, "Item out of stock");
+
         Order memory order = Order(block.timestamp, item);
         orderCount[msg.sender]++;
         orders[msg.sender][orderCount[msg.sender]] = order;
         items[_id].stock = item.stock - 1;
-        emit Buy(msg.sender, orderCount[msg.sender],item.id);
+
+        emit Buy(msg.sender, orderCount[msg.sender], item.id);
     }
 
-    function withdraw() public onlyOwner{
+    function withdraw() public onlyOwner {
         (bool success, ) = owner.call{value: address(this).balance}("");
-        require(success);
+        require(success, "Withdrawal failed");
+    }
+
+    // New function to get product details
+    function getProduct(uint256 _id) public view returns (Item memory) {
+        return items[_id];
     }
 }

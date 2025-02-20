@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./profile.css"; 
 
-
-
+// Components
+import Navigation from './components/Navigation';
+import FooterNavigation from "./components/FooterNavigation";
 
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 
 
 const ProfileP = () => {
   const navigate = useNavigate();
+  const [acc, setAccount] = useState(null)
   
   const handleregis = () => {
     navigate('/'); 
@@ -20,10 +22,7 @@ const ProfileP = () => {
   return (
     <div className="profile-page">
       {/* Header */}
-      <div className="navbar">
-        <span className="app-title">Vehicle App</span>
-        <button className="connect-wallet">Connect Wallet</button>
-      </div>
+      <Navigation account={acc} setAccount={setAccount} />
 
       {/* Profile Section */}
       <div class="profile-container">
@@ -80,15 +79,7 @@ const ProfileP = () => {
       </section>
 
       {/* Footer Navigation */}
-      <footer className="footer-nav">
-        <nav className="nav-bar">
-          <button className="nav-item"onClick={handleregis}>Home</button>
-          <button className="nav-item">Search</button>
-          <button className="nav-item">Sell</button>
-          <button className="nav-item">Cart</button>
-          <button className="nav-item"onClick={handleregis2}>Profile</button>
-        </nav>
-      </footer>
+      <FooterNavigation></FooterNavigation>
     </div>
   );
 };

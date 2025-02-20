@@ -9,6 +9,7 @@ import Buy from './Buy';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AllTokens, MintToken, TokenDetail, Transactions} from './pages';
 import { EthereumProvider } from './EthereumContext';
+import ProductDetail from './components/Product';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -48,7 +49,11 @@ const router = createBrowserRouter([
   {
     path: "/Buy",
     element: <Buy/>
-  }
+  },
+  {
+    path: "/product/:productId",
+    element: <ProductDetail />
+  },
 ]);
 
 root.render(
