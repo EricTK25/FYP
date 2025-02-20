@@ -36,6 +36,14 @@ CREATE TABLE `carrierlist` (
   `stock` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
+CREATE TABLE profiles (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  address VARCHAR(42) UNIQUE NOT NULL,
+  name VARCHAR(255),
+  email VARCHAR(255),
+  phoneNumber VARCHAR(20)
+);
+
 --
 -- 傾印資料表的資料 `carrierlist`
 --

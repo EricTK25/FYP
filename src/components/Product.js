@@ -115,6 +115,7 @@ function ProductDetail() {
     </div>
     <FooterNavigation></FooterNavigation>
     </div>
+    
   );
 }
 
