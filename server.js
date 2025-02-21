@@ -10,9 +10,9 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const db = mysql.createConnection({
-  host: '183.178.197.46',
+  host: 'localhost',
   user: 'root',
-  password: '24950807Asd!',
+  password: 'root',
   database: 'fypProject',
   port: '3306'
 });

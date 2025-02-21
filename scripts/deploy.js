@@ -21,11 +21,11 @@ async function main() {
     config[networkId] = { CarrierApp: { address: await carrierapp.getAddress() } };
     fs.writeFileSync('../FYP/src/config.json', JSON.stringify(config, null, 2));
     const connection = await mysql.createConnection({
-      host: '',
-      user: '',
-      password: '',
-      database: '',
-      port: ''
+      host: 'localhost',
+      user: 'root',
+      password: 'root',
+      database: 'fypProject',
+      port: '3306'
     });
 
     const [rows] = await connection.execute('SELECT * FROM carrierlist');

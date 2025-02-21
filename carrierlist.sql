@@ -49,15 +49,15 @@ CREATE TABLE profiles (
 --
 
 INSERT INTO `carrierlist` (`product_id`, `product_name`, `product_category`, `product_image`, `cost`, `stock`) VALUES
-(1, 'Tesla', 'Car', 'https://www.tesla.com/ownersmanual/images/GUID-B5641257-9E85-404B-9667-4DA5FDF6D2E7-online-en-US.png', 1.00, 10),
-(2, 'Toyota', 'Car', 'https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/drone.jpg', 2.00, 6),
-(3, 'Honda', 'Car', 'https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/headset.jpg', 0.25, 24),
-(4, 'DaeWoo', 'Car', 'https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/shoes.jpg', 0.25, 3),
-(5, 'Holden', 'Car', 'https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/sunglasses.jpg', 0.10, 12),
-(6, 'Jaguar', 'Car', 'https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/watch.jpg', 1.25, 0),
-(7, 'BMW', 'Car', 'https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/cube.jpg', 0.05, 15),
-(8, 'Ford', 'Car', 'https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/train.jpg', 0.20, 0),
-(9, 'Audi', 'Car', 'https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/robots.jpg', 0.15, 12);
+(1, 'TeslaShit', 'Car', 'https://www.tesla.com/ownersmanual/images/GUID-B5641257-9E85-404B-9667-4DA5FDF6D2E7-online-en-US.png', '1.00', 10),
+(2, 'Toyota', 'Car', 'https://purepng.com/public/uploads/large/purepng.com-toyotatoyotamotor-corporationautomotivemanufactureraichimultinational-1701527678510h6ezr.png', '2.00', 6),
+(3, 'Honda', 'Car', 'https://purepng.com/public/uploads/large/white-honda-sedan-product-kind-honda-car-qpv.png', '0.25', 24),
+(4, 'DaeWoo', 'Car', 'https://purepng.com/public/uploads/large/cobalt-color-car-rf1.png', '0.25', 3),
+(5, 'Holden', 'Car', 'https://purepng.com/public/uploads/large/red-car-ezq.png', '0.10', 12),
+(6, 'Jaguar', 'Car', 'https://purepng.com/public/uploads/large/purepng.com-jaguar-e-type-coupe-carcarvehicletransportjaguar-961524666464d2lcd.png', '1.25', 0),
+(7, 'BMW', 'Car', 'https://purepng.com/public/uploads/large/purepng.com-bmwbmwcarluxurious-carbmw-cars-1701527416177jaalq.png', '0.05', 15),
+(8, 'Ford', 'Car', 'https://purepng.com/public/uploads/large/purepng.com-fordfordcarfodr-carvehicle-1701527484491zugjq.png', '0.20', 0),
+(9, 'Audi', 'Car', 'https://purepng.com/public/uploads/large/black-edition-audi-luxury-car-1nm.png', '0.15', 12);
 
 --
 -- 已傾印資料表的索引
