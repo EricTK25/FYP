@@ -1,7 +1,7 @@
-const hre = require("hardhat");
 const mysql = require('mysql2/promise');
 const config = require('../src/config.json');
 const fs = require('fs');
+require('dotenv').config();
 
 const tokens = (n) => {
   return ethers.parseUnits(n.toString(), 'ether');
@@ -20,12 +20,13 @@ async function main() {
     await carrierapp.waitForDeployment();
     config[networkId] = { CarrierApp: { address: await carrierapp.getAddress() } };
     fs.writeFileSync('../FYP/src/config.json', JSON.stringify(config, null, 2));
+    
     const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: 'root',
-      database: 'fypProject',
-      port: '3306'
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DBNAME,
+      port: process.env.DB_PORT
     });
 
     const [rows] = await connection.execute('SELECT * FROM carrierlist');
