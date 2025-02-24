@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import CarrierTokenABI from './CarrierTokenABI.json';
+import CarrierTokenABI from './abis/CarrierTokenABI.json';
 
 const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS;
 

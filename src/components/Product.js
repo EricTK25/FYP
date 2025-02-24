@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
 import CarrierApp from '../abis/CarrierApp.json';
-import config from '../config.json';
+import deployConfig from '../deployConfig.json';
 import Navigation from './Navigation';
 import FooterNavigation from './FooterNavigation';
 import '../App.css'; // Import your CSS file
@@ -39,7 +39,7 @@ function ProductDetail() {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const network = await provider.getNetwork();
       const carrierapp = new ethers.Contract(
-        config[network.chainId].CarrierApp.address,
+        deployConfig[network.chainId].CarrierApp.address,
         CarrierApp,
         provider
       );
