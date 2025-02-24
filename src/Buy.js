@@ -11,8 +11,8 @@ import HeroSection from "./components/HeroSection";
 import Section from "./components/Section"; 
 import FooterNavigation from "./components/FooterNavigation";
 
-// Config
-import config from './config.json';
+// deployConfig
+import deployConfig from './deployConfig.json';
 
 function Buy() {
     const specifications = [
@@ -34,7 +34,7 @@ function Buy() {
             setProvider(provider);
             const network = await provider.getNetwork();
             let carrierapp = new ethers.Contract(
-                config[network.chainId].CarrierApp.address,
+                deployConfig[network.chainId].CarrierApp.address,
                 CarrierApp,
                 provider
             );
@@ -61,7 +61,6 @@ function Buy() {
             image: item.image,
             specifications: specifications,
             highlights: highlights
-            // Add any other primitive values you need
         }});
     };
 

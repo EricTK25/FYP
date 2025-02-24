@@ -25,7 +25,7 @@
 
 ### 5. Run deployment script
 In a separate terminal execute:
-`$ npx hardhat run ./scripts/deploy.js --network localhost`
+`$ npx hardhat run --network localhost deploy/deploy.js`
 
 ### 6. Start frontend
-`$ npm run start`
+`$ npm start`

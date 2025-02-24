@@ -1,18 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { ethers } from 'ethers'
-import "./App.css"; // Make sure to create a CSS file for styling
 
 // Components
 import Navigation from './components/Navigation';
 import HeroSection from "./components/HeroSection";
 import FooterNavigation from "./components/FooterNavigation";
-
-// ABIs
-import CarrierApp from './abis/CarrierApp.json'
-
-// Config
-import config from './config.json'
-import { useEthereum } from './EthereumContext';
 
 function App() {
   const [cars, setCars] = useState([]);
@@ -77,10 +68,9 @@ function App() {
 
   return (
     <div className="App">
-      {/* Navbar */}
       <Navigation account={acc} setAccount={setAccount} />
-      {/* Hero Section  */}
       <HeroSection/>
+
       {/* Top Sellers Section */}
       <h2 className="section-title">TOP SELLERS</h2>
       <div className="car-list">
@@ -98,7 +88,6 @@ function App() {
         )}
       </div>
 
-      {/* Footer */}
       <FooterNavigation></FooterNavigation>
     </div>
   );
