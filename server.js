@@ -33,6 +33,26 @@ app.post('/api/profile', (req, res) => {
   });
 });
 
+app.put('/api/profile/:address', async (req, res) => {
+  const { name, email, phoneNumber } = req.body;
+
+  try {
+    const profile = await Profile.findOneAndUpdate(
+      { address: req.params.address },
+      { name, email, phoneNumber },
+      { new: true }
+    );
+
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    res.json(profile);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 app.get('/api/profile/:address', (req, res) => {
   const address = req.params.address;
   const query = 'SELECT * FROM profiles WHERE address = ?';

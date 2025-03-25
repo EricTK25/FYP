@@ -40,18 +40,56 @@ const ProfileP = () => {
     fetchProfile();
   }, [account]);
 
+
+  const handleEdit = async () => {
+    setShowEdit(true);
+
+  };
+  
+  const handleSaveProfile = async () => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/profile/${account}`, {
+        name,
+        email,
+        phoneNumber,
+      });
+      setProfile(response.data);
+      setShowEdit(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+  
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newProfile = { address: account, name, email, phoneNumber };
-    await axios.post('http://localhost:5000/api/profile', newProfile);
-    setProfile(newProfile);
-    setIsPrompted(true);
-    setShowModal(false); 
-    setShowEdit(false); 
+    try {
+      if (profile) {
+
+        await axios.put(`http://localhost:5000/api/profile/${account}`, newProfile);
+      } else {
+
+        await axios.post('http://localhost:5000/api/profile', { address: account, ...newProfile });
+        setIsPrompted(true);
+      }
+      setProfile(newProfile);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error submitting profile:", error);
+    }
   };
 
   const toggleEdit = () => {
-    setShowEdit((prevShowEdit) => !prevShowEdit); 
+    setShowEdit((prevShowEdit) => {
+      const newShowEdit = !prevShowEdit;
+      if (newShowEdit) {
+        document.querySelector('.option .arrow').textContent = ' v ';
+      } else {
+        document.querySelector('.option .arrow').textContent = ' > ';
+      }
+      return newShowEdit;
+    });
   };
 
   const handleregis = () => {
@@ -123,37 +161,45 @@ const ProfileP = () => {
           <span className="arrow"> > </span>
         </div>
         </section>
-        {showEdit && (
-  <div className="edit-form">
-    <form onSubmit={handleSubmit}>
-      <label>Name:</label>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-      />
-      <label>Email:</label>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <label>Phone:</label>
-      <input
-        type="tel"
-        value={phoneNumber}
-        onChange={(e) => setPhoneNumber(e.target.value)}
-        required
-      />
-      <button type="submit">Save</button>
-      <button type="button" onClick={toggleEdit}>
-        Cancel
-      </button>
-    </form>
-  </div>
-)}
+      
+        <div className="option" onClick={handleEdit}>
+        <span>Edit Profile</span>
+        <span className="arrow"> > </span>
+      </div>
+
+      {showEdit && (
+        <div className="edit-form">
+          <form>
+            <label>Name:</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <label>Email:</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <label>Phone:</label>
+            <input
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              required
+            />
+            <button type="button" onClick={handleSaveProfile}>
+              Save
+            </button>
+            <button type="button" onClick={toggleEdit}>
+              Cancel
+            </button>
+          </form>
+        </div>
+      )}
 
          
 <section className="options-section">  
