@@ -13,6 +13,7 @@ const ProfileP = () => {
   const [profile, setProfile] = useState(null);
   const [isPrompted, setIsPrompted] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showEdit, setShowEdit] = useState(false); // 控制編輯表單的顯示
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -24,6 +25,9 @@ const ProfileP = () => {
           const response = await axios.get(`http://localhost:5000/api/profile/${account}`);
           if (response.data.length > 0) {
             setProfile(response.data[0]);
+            setName(response.data[0].name);
+            setEmail(response.data[0].email);
+            setPhoneNumber(response.data[0].phoneNumber);
           } else if (!isPrompted){
             setShowModal(true);
           }
@@ -43,8 +47,12 @@ const ProfileP = () => {
     setProfile(newProfile);
     setIsPrompted(true);
     setShowModal(false); 
+    setShowEdit(false); 
   };
 
+  const toggleEdit = () => {
+    setShowEdit((prevShowEdit) => !prevShowEdit); 
+  };
 
   const handleregis = () => {
     navigate('/'); 
@@ -110,11 +118,45 @@ const ProfileP = () => {
 
       {/* Options Section */}
       <section className="options-section">
-        <Link to="/edit-profile" className="option">
+      <div className="option" onClick={toggleEdit}> 
           <span>Edit Profile</span>
           <span className="arrow"> > </span>
-          
-        </Link>
+        </div>
+        </section>
+        {showEdit && (
+  <div className="edit-form">
+    <form onSubmit={handleSubmit}>
+      <label>Name:</label>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+      <label>Email:</label>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <label>Phone:</label>
+      <input
+        type="tel"
+        value={phoneNumber}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+        required
+      />
+      <button type="submit">Save</button>
+      <button type="button" onClick={toggleEdit}>
+        Cancel
+      </button>
+    </form>
+  </div>
+)}
+
+         
+<section className="options-section">  
         <Link to="/shipping-address" className="option">
           <span>Shipping Address</span>
           <span className="arrow"> > </span>
@@ -131,6 +173,7 @@ const ProfileP = () => {
           
         </Link>
       </section>
+
 
       {/* Footer Navigation */}
       <footer className="footer-nav">
