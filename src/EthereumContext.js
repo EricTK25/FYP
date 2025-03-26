@@ -37,6 +37,12 @@ export function EthereumProvider({ children }) {
     }
   };
 
+  
+  const disconnectWallet = () => {
+    setAccount(null); 
+
+  };
+
   const loadTokens = async () => {
     try {
       const totalSupply = await contract.getTokenIds();
@@ -67,6 +73,7 @@ export function EthereumProvider({ children }) {
         contract,
         account,
         allTokens,
+        disconnectWallet,
         connectWallet,
         loadTokens
       }}

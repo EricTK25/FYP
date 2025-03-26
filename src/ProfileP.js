@@ -9,54 +9,58 @@ import axios from 'axios';
 
 const ProfileP = () => {
   const navigate = useNavigate();
-  const { account, connectWallet } = useEthereum();
+  const { account, connectWallet,disconnectWallet} = useEthereum();
   const [profile, setProfile] = useState(null);
   const [isPrompted, setIsPrompted] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [showEdit, setShowEdit] = useState(false); // 控制編輯表單的顯示
+  const [showEdit, setShowEdit] = useState(false); 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (account) {
-        try {
-          const response = await axios.get(`http://localhost:5000/api/profile/${account}`);
-          if (response.data.length > 0) {
-            setProfile(response.data[0]);
-            setName(response.data[0].name);
-            setEmail(response.data[0].email);
-            setPhoneNumber(response.data[0].phoneNumber);
-          } else if (!isPrompted){
-            setShowModal(true);
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
+  const fetchProfile = async () => {
+    if (account) {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/profile/${account}`);
+        if (response.data.length > 0) {
+          setProfile(response.data[0]);
+          setName(response.data[0].name);
+          setEmail(response.data[0].email);
+          setPhoneNumber(response.data[0].phoneNumber);
+        } else if (!isPrompted) {
+          setShowModal(true);
         }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
       }
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchProfile();
   }, [account]);
 
-
-  const handleEdit = async () => {
-    setShowEdit(true);
-
-  };
   
   const handleSaveProfile = async () => {
+    console.log({
+      name,
+      email,
+      phoneNumber,
+    });
     try {
       const response = await axios.put(`http://localhost:5000/api/profile/${account}`, {
         name,
         email,
         phoneNumber,
       });
+  
       setProfile(response.data);
+      console.log("Profile updated successfully:", response.data); 
+
+      fetchProfile();
       setShowEdit(false);
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error updating profile:", error.response ? error.response.data : error.message);
     }
   };
   
@@ -92,12 +96,19 @@ const ProfileP = () => {
     });
   };
 
+  const handleLogout = () => {
+    disconnectWallet(); 
+    navigate('/'); 
+  };
+  
   const handleregis = () => {
     navigate('/'); 
   };
+
   const handleregis2 = () => {
     navigate('/ProfileP'); 
   };
+
   return (
     <div className="profile-page">
       {/* Header */}
@@ -111,10 +122,10 @@ const ProfileP = () => {
       </div>
 
       {/* Profile Section */}
-      <div class="profile-container">
-        <div class="profile-picture">
-          <div class="camera-icon">
-            <i class="icon-camera">📷</i> 
+      <div className="profile-container">
+        <div className="profile-picture">
+          <div className="camera-icon">
+            <i className="icon-camera">📷</i> 
           </div>
         </div>
       </div>
@@ -133,7 +144,6 @@ const ProfileP = () => {
       )}
     </div>
       
-
       {/* Orders Section */}
       <section className="orders-section">
         <h2 className="title">My Orders</h2>
@@ -161,11 +171,6 @@ const ProfileP = () => {
           <span className="arrow"> > </span>
         </div>
         </section>
-      
-        <div className="option" onClick={handleEdit}>
-        <span>Edit Profile</span>
-        <span className="arrow"> > </span>
-      </div>
 
       {showEdit && (
         <div className="edit-form">
@@ -200,9 +205,8 @@ const ProfileP = () => {
           </form>
         </div>
       )}
-
-         
-<section className="options-section">  
+ 
+      <section className="options-section">  
         <Link to="/shipping-address" className="option">
           <span>Shipping Address</span>
           <span className="arrow"> > </span>
@@ -213,13 +217,11 @@ const ProfileP = () => {
           <span className="arrow"> > </span>
           
         </Link>
-        <Link to="/logout" className="option">
+        <div className="option" onClick={handleLogout}> 
           <span>Logout</span>
           <span className="arrow"> > </span>
-          
-        </Link>
+        </div>
       </section>
-
 
       {/* Footer Navigation */}
       <footer className="footer-nav">

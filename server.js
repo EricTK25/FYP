@@ -15,7 +15,7 @@ const db = mysql.createConnection({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DBNAME,
-  port: process.env.DB_PORT
+  port: process.env.DB_PORT,
 });
 
 db.connect(err => {
@@ -23,6 +23,7 @@ db.connect(err => {
   console.log('Connected to MySQL Database.');
 });
 
+// 創建 Profile
 app.post('/api/profile', (req, res) => {
   const { address, name, email, phoneNumber } = req.body;
   const query = 'INSERT INTO profiles (address, name, email, phoneNumber) VALUES (?, ?, ?, ?)';
@@ -33,24 +34,18 @@ app.post('/api/profile', (req, res) => {
   });
 });
 
-app.put('/api/profile/:address', async (req, res) => {
+app.put('/api/profile/:address', (req, res) => {
   const { name, email, phoneNumber } = req.body;
+  const address = req.params.address;
+  const query = 'UPDATE profiles SET name = ?, email = ?, phoneNumber = ? WHERE address = ?';
 
-  try {
-    const profile = await Profile.findOneAndUpdate(
-      { address: req.params.address },
-      { name, email, phoneNumber },
-      { new: true }
-    );
-
-    if (!profile) {
+  db.query(query, [name, email, phoneNumber, address], (err, result) => {
+    if (err) return res.status(500).send(err);
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Profile not found' });
     }
-
-    res.json(profile);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
+    res.json({ message: 'Profile updated successfully.' });
+  });
 });
 
 app.get('/api/profile/:address', (req, res) => {
