@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
+const multer = require('multer');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -23,7 +24,37 @@ db.connect(err => {
   console.log('Connected to MySQL Database.');
 });
 
-// 創建 Profile
+// config multer 
+const storage = multer.memoryStorage(); 
+const upload = multer({ storage: storage });
+
+//upload icon
+app.post('/api/profile/icon/:address', upload.single('icon'), (req, res) => {
+  const address = req.params.address;
+  const iconData = Buffer.from(req.file.buffer).toString('base64'); 
+
+  const sql = 'UPDATE profiles SET icon_data = ? WHERE address = ?';
+  db.query(sql, [iconData, address], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send('Icon uploaded successfully');
+  });
+});
+
+//get icon
+app.get('/api/profile/icon/:address', (req, res) => {
+  const address = req.params.address;
+  const sql = 'SELECT icon_data FROM profiles WHERE address = ?';
+
+  db.query(sql, [address], (err, result) => {
+    if (err) return res.status(500).send(err);
+    if (result.length === 0) return res.status(404).send('Icon not found');
+
+    const base64Image = result[0].icon_data; 
+    res.json({ icon: base64Image }); 
+  });
+});
+
+//Profile
 app.post('/api/profile', (req, res) => {
   const { address, name, email, phoneNumber } = req.body;
   const query = 'INSERT INTO profiles (address, name, email, phoneNumber) VALUES (?, ?, ?, ?)';

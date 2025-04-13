@@ -4,7 +4,7 @@ import "../src/profile.css";
 import { useEthereum } from './EthereumContext';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import FooterNavigation from "./components/FooterNavigation";
 
 
 const ProfileP = () => {
@@ -14,10 +14,11 @@ const ProfileP = () => {
   const [isPrompted, setIsPrompted] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showEdit, setShowEdit] = useState(false); 
+  const [showIconUpload, setShowIconUpload] = useState(false); // 新增狀態來控制圖標上傳
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  
+  const [profileIcon, setProfileIcon] = useState(null); 
   const fetchProfile = async () => {
     if (account) {
       try {
@@ -40,7 +41,7 @@ const ProfileP = () => {
     fetchProfile();
   }, [account]);
 
-  
+  //New profile submission
   const handleSaveProfile = async () => {
     console.log({
       name,
@@ -53,10 +54,8 @@ const ProfileP = () => {
         email,
         phoneNumber,
       });
-  
       setProfile(response.data);
       console.log("Profile updated successfully:", response.data); 
-
       fetchProfile();
       setShowEdit(false);
     } catch (error) {
@@ -64,7 +63,41 @@ const ProfileP = () => {
     }
   };
   
-  
+  //icon data
+  const fetchProfileIcon = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/profile/icon/${account}`);
+      const base64Image = response.data.icon;
+      setProfileIcon(`data:image/png;base64,${base64Image}`); // place Base64 to data URL
+    } catch (error) {
+      console.error("get profile icon failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileIcon();
+  }, [account]);
+
+  const handleIconUpload = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('icon', file);
+
+    try {
+      await axios.post(`http://localhost:5000/api/profile/icon/${account}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      alert("Icon uploaded successfully!");
+      fetchProfileIcon();
+      setShowIconUpload(false);
+    } catch (error) {
+      console.error("Icon uploaded failed:", error);
+    }
+  };
+
+//profile submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newProfile = { address: account, name, email, phoneNumber };
@@ -84,31 +117,53 @@ const ProfileP = () => {
     }
   };
 
-  const toggleEdit = () => {
-    setShowEdit((prevShowEdit) => {
-      const newShowEdit = !prevShowEdit;
-      if (newShowEdit) {
-        document.querySelector('.option .arrow').textContent = ' v ';
-      } else {
-        document.querySelector('.option .arrow').textContent = ' > ';
-      }
-      return newShowEdit;
-    });
-  };
+//edit profile
+const toggleEdit = () => {
+  setShowEdit((prevShowEdit) => {
+    const newShowEdit = !prevShowEdit;
+    const editArrow = document.querySelector('.edit-arrow');
+    if (newShowEdit) {
+      editArrow.textContent = ' v ';
+    } else {
+      editArrow.textContent = ' > ';
+    }
+    return newShowEdit;
+  });
+};
 
+const toggleIconUpload = () => {
+  setShowIconUpload((prevShowIconUpload) => {
+    const newShowIconUpload = !prevShowIconUpload;
+    const iconArrow = document.querySelector('.icon-arrow');
+    if (newShowIconUpload) {
+      iconArrow.textContent = ' v ';
+    } else {
+      iconArrow.textContent = ' > ';
+    }
+    return newShowIconUpload;
+  });
+};
+
+const toggleShip = () => {
+  setShowEdit((prevShowEdit) => {
+    const newShowEdit = !prevShowEdit;
+    const editArrow = document.querySelector('.edit-arrow');
+    if (newShowEdit) {
+      editArrow.textContent = ' v ';
+    } else {
+      editArrow.textContent = ' > ';
+    }
+    return newShowEdit;
+  });
+};
+
+//logout wallet
   const handleLogout = () => {
     disconnectWallet(); 
     navigate('/'); 
   };
-  
-  const handleregis = () => {
-    navigate('/'); 
-  };
 
-  const handleregis2 = () => {
-    navigate('/ProfileP'); 
-  };
-
+//UI
   return (
     <div className="profile-page">
       {/* Header */}
@@ -120,31 +175,96 @@ const ProfileP = () => {
           <button className="connect-wallet" onClick={connectWallet}>Connect Wallet</button>
         )}
       </div>
-
       {/* Profile Section */}
       <div className="profile-container">
         <div className="profile-picture">
-          <div className="camera-icon">
-            <i className="icon-camera">📷</i> 
-          </div>
+            {profile && profile.icon_data && (
+              <img
+              src={profileIcon}
+              alt="Profile Icon"
+              style={{ width: '100px', height: '100px' }} // Adjust size
+              />
+            )}
         </div>
       </div>
 
       <div className="profile-detail">
       <h2>Profile</h2>
-      {profile ? (
-        <div>
-          <h3>{profile.name}</h3>
-          <p>Email: {profile.email}</p>
-          <p>Phone: {profile.phoneNumber}</p>
+        {profile ? (
+          <div>
+            <h3>{profile.name}</h3>
+            <p>Email: {profile.email}</p>
+            <p>Phone: {profile.phoneNumber}</p>
+          
+          {/* Options Section */}
+          <section className="options-section">
+            <div className="option" onClick={toggleEdit}> 
+            <span>Edit Profile</span>
+            <span className="arrow edit-arrow"> > </span>
+            </div>
+          {/*Edit From*/}
+          {showEdit && (
+            <div className="edit-form">
+              <form>
+                <label>Name:</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required/>
+                <label>Email:</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required/>
+                <label>Phone:</label>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required/>
+                <button type="button" onClick={handleSaveProfile}>
+                  Save
+                </button>
+                <button type="button" onClick={toggleEdit}>
+                  Cancel
+                </button>
+              </form>
+            </div>
+          )}
+            <div className="option" onClick={toggleIconUpload}> 
+            <span>Edit Icon</span>
+            <span className="arrow icon-arrow"> > </span>
+            </div>
+            {showIconUpload && (
+                <input type="file" accept="image/*" onChange={handleIconUpload} />
+              )}
+            <div className="option" onClick={toggleShip}> 
+            <span>Shipping Address</span>
+            <span className="arrow ship-arrow"> > </span>
+            </div>
+
+            <Link to="/selling-management" className="option">
+              <span>Selling Management</span>
+              <span className="arrow"> > </span>
+            </Link>
+
+            <div className="option" onClick={handleLogout}> 
+              <span>Logout</span>
+              <span className="arrow"> > </span>
+            </div>
+            <div>
         </div>
+          </section>
+            </div>
       ) : ( <h3>
         You haven't connected to the metamask wallet or entered your personal information!
       </h3>
       )}
     </div>
-      
-      {/* Orders Section */}
+  
+      {/* Orders Section
       <section className="orders-section">
         <h2 className="title">My Orders</h2>
         <div className="underline"></div>
@@ -163,76 +283,10 @@ const ProfileP = () => {
           </div>
         </div>
       </section>
+      */}
 
-      {/* Options Section */}
-      <section className="options-section">
-      <div className="option" onClick={toggleEdit}> 
-          <span>Edit Profile</span>
-          <span className="arrow"> > </span>
-        </div>
-        </section>
-
-      {showEdit && (
-        <div className="edit-form">
-          <form>
-            <label>Name:</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <label>Email:</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <label>Phone:</label>
-            <input
-              type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              required
-            />
-            <button type="button" onClick={handleSaveProfile}>
-              Save
-            </button>
-            <button type="button" onClick={toggleEdit}>
-              Cancel
-            </button>
-          </form>
-        </div>
-      )}
- 
-      <section className="options-section">  
-        <Link to="/shipping-address" className="option">
-          <span>Shipping Address</span>
-          <span className="arrow"> > </span>
-          
-        </Link>
-        <Link to="/selling-management" className="option">
-          <span>Selling Management</span>
-          <span className="arrow"> > </span>
-          
-        </Link>
-        <div className="option" onClick={handleLogout}> 
-          <span>Logout</span>
-          <span className="arrow"> > </span>
-        </div>
-      </section>
-
-      {/* Footer Navigation */}
-      <footer className="footer-nav">
-        <nav className="nav-bar">
-          <button className="nav-item"onClick={handleregis}>Home</button>
-          <button className="nav-item">Search</button>
-          <button className="nav-item">Sell</button>
-          <button className="nav-item">Cart</button>
-          <button className="nav-item"onClick={handleregis2}>Profile</button>
-        </nav>
-      </footer>
+      {/* Footer */}
+      <FooterNavigation></FooterNavigation>
 
       {showModal && (
         <div className="modal-overlay">
@@ -273,6 +327,7 @@ const ProfileP = () => {
               </div>
               <button type="submit">Submit</button>
               <button type="button" onClick={() => setShowModal(false)}>Cancel</button>
+              
             </form>
           </div>
         </div>
@@ -282,3 +337,4 @@ const ProfileP = () => {
 };
 
 export default ProfileP;
+ 
