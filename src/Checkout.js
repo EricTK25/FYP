@@ -2,54 +2,44 @@ import React, { useState, useEffect } from "react";
 import { useEthereum } from "./EthereumContext";
 import { useLocation } from "react-router-dom";
 import { parseUnits } from "ethers"; 
+import CarrierApp from './abis/CarrierApp.json';
+import { ethers } from 'ethers';
+import config from './config.json';
 import "./Checkout.css";
 
 const Checkout = () => {
-    const { provider, contract, account } = useEthereum();
+    const {contract, account } = useEthereum();
     const location = useLocation();
     const { cart } = location.state || {};
     const [transactionHash, setTransactionHash] = useState(null);
     const [hasBought, setHasBought] = useState(false);
+    const [carrierapp, setCarrierApp] = useState(null);
+    const [provider, setProvider] = useState(null);
 
-    useEffect(() => {
-        if (hasBought) {
-            fetchDetails();
-        }
-    }, [hasBought]);
+   useEffect(() => {
+       const loadBlockchainData = async () => {
+         const provider = new ethers.BrowserProvider(window.ethereum);
+         const network = await provider.getNetwork();
+         const carrierapp = new ethers.Contract(
+           config[network.chainId].CarrierApp.address,
+           CarrierApp,
+           provider
+         );
+   
+         setProvider(provider);
+         setCarrierApp(carrierapp);
+       };
+   
+       loadBlockchainData();
+     }, []);
 
-    const fetchDetails = async () => {
-        if (!contract) {
-            console.error("Contract instance is not defined");
-            return;
-        }
-
-        const events = await contract.queryFilter("Buy");
-        const orders = events.filter(
-            (event) => event.args.buyer === account && cart.some(item => item.id.toString() === event.args.itemId.toString())
-        );
-
-        if (orders.length === 0) return;
-
-        const orderDetails = await Promise.all(
-            orders.map(async (order) => {
-                return await contract.orders(account, order.args.orderId);
-            })
-        );
-
-        console.log(orderDetails);
-    };
-
-    const buyHandler = async (product_id, cost) => {
-        try {
-            const signer = await provider.getSigner();
-            let transaction = await contract.connect(signer).buy(product_id, { value: cost });
-            await transaction.wait();
-            setTransactionHash(transaction.hash);
-            setHasBought(true);
-        } catch (error) {
-            console.error("Transaction failed", error);
-        }
-    };
+     const buyHandler = async (product_id, cost) => {
+        const signer = await provider.getSigner();
+    
+        let transaction = await carrierapp.connect(signer).buy(product_id, { value: cost });
+        await transaction.wait();
+      };
+    
 
     const handlePurchase = async () => {
         try {
