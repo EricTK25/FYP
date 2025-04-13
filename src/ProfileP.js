@@ -6,6 +6,8 @@ import "./profile.css";
 
 
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import FooterNavigation from "./components/FooterNavigation";
+import Navigation from "./components/Navigation";
 
 
 const ProfileP = () => {
@@ -19,11 +21,7 @@ const ProfileP = () => {
   };
   return (
     <div className="profile-page">
-      {/* Header */}
-      <div className="navbar">
-        <span className="app-title">Vehicle App</span>
-        <button className="connect-wallet">Connect Wallet</button>
-      </div>
+     <Navigation/>
 
       {/* Profile Section */}
       <div class="profile-container">
@@ -59,36 +57,27 @@ const ProfileP = () => {
       <section className="options-section">
         <Link to="/edit-profile" className="option">
           <span>Edit Profile</span>
-          <span className="arrow"> > </span>
+          <span className="arrow">  </span>
           
         </Link>
         <Link to="/shipping-address" className="option">
           <span>Shipping Address</span>
-          <span className="arrow"> > </span>
+          <span className="arrow">  </span>
           
         </Link>
         <Link to="/selling-management" className="option">
           <span>Selling Management</span>
-          <span className="arrow"> > </span>
+          <span className="arrow"> </span>
           
         </Link>
         <Link to="/logout" className="option">
           <span>Logout</span>
-          <span className="arrow"> > </span>
+          <span className="arrow"> </span>
           
         </Link>
       </section>
 
-      {/* Footer Navigation */}
-      <footer className="footer-nav">
-        <nav className="nav-bar">
-          <button className="nav-item"onClick={handleregis}>Home</button>
-          <button className="nav-item">Search</button>
-          <button className="nav-item">Sell</button>
-          <button className="nav-item">Cart</button>
-          <button className="nav-item"onClick={handleregis2}>Profile</button>
-        </nav>
-      </footer>
+    <FooterNavigation/>
     </div>
   );
 };

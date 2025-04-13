@@ -1,8 +1,3 @@
-<<<<<<< Updated upstream
-import { ethers } from 'ethers'
-
-const Section = ({ title, items, togglePop }) => {
-=======
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Gun from "gun";
@@ -55,7 +50,6 @@ const Section = ({ title, items, cart, setCart }) => {
         });
     };
 
->>>>>>> Stashed changes
     return (
         <div className='cards__section'>
             <h3 id ={title}>{title}</h3>
@@ -63,16 +57,6 @@ const Section = ({ title, items, cart, setCart }) => {
             <hr/>
 
             <div className='cards'>
-<<<<<<< Updated upstream
-                {items.map((item, index) => (
-                    <div className='card' key={index} onClick={() => togglePop(item)}>
-                        <div className='card__image'>
-                            <img src={item.image} alt="Item" />
-                        </div>
-                        <div className='card__info'>
-                            <h4>{item.name}</h4>
-                            <p>{ethers.formatUnits(item.cost.toString(), 'ether')} ETH</p>
-=======
                 {items.map((item) => (
                     <div 
                         className='card' 
@@ -94,7 +78,6 @@ const Section = ({ title, items, cart, setCart }) => {
                             >
                                 Add to Cart
                             </button>
->>>>>>> Stashed changes
                         </div>
                     </div>
                 ))}

@@ -63,12 +63,8 @@ contract CarrierApp {
         orderCount[msg.sender]++;
         orders[msg.sender][orderCount[msg.sender]] = order;
         items[_id].stock = item.stock - 1;
-<<<<<<< Updated upstream
-        emit Buy(msg.sender, orderCount[msg.sender],item.id);
-=======
 
         emit Buy(msg.sender, orderCount[msg.sender], item.product_id);
->>>>>>> Stashed changes
     }
 
     function withdraw() public onlyOwner{

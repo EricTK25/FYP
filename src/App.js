@@ -109,64 +109,7 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      {/* Navbar */}
-      <div className="navbar">
-        <span className="app-title">Vehicle App</span>
-        <Link to="/mint">Mint</Link>
-        <Link to="/allTokens">AllTokens</Link>
-        
-        {account ? (
-          <span>Connected: {account.slice(0,6)}...{account.slice(-4)}</span>
-        ) : (
-          <button className="connect-wallet" onClick={connectWallet}>Connect Wallet</button>
-        )}
-      </div>
-
-      {/* The car and men  */}
-      <div className="hero-section">
-      <img src="/homecar.png" alt="My Description" />
-      </div>
-
-      <div>
-        <Navigation account={acc} setAccount={setAccount} />
-        <h2>Vehicle App Best Sellers</h2>
-        {car &&(
-          <Section title={"Car"} items={car} togglePop={togglePop} />
-        )}
-        {toggle && (
-          <Product item={item} provider={provider} account={account} carrierapp={carrierapp} togglePop={togglePop} />
-        )}
-      </div>
-
-      {/* Top Sellers Section */}
-      <h2 className="section-title">TOP SELLERS</h2>
-      <div className="car-list">
-        {loading ? (
-          <p>Loading cars...</p>
-        ) : (
-          cars.map((car) => (
-            <div key={car.tokenId} className="car-card">
-              <img src={car.image} alt={car.name} className="car-image" />
-              <h3>{car.name}</h3>
-              <p>${car.price}</p>
-              <button className="add-to-cart">purchase</button>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Footer */}
-      <footer className="footer-nav">
-        <nav className="nav-bar">
-          <button className="nav-item"onClick={'/'}>Home</button>
-          <button className="nav-item"onClick={'/Search'}>Search</button>
-          <button className="nav-item">Sell</button>
-          <button className="nav-item">Cart</button>
-          <button className="nav-item"onClick={'ProfileP'}>Profile</button>
-        </nav>
-      </footer>
-    </div>
+    <Navigation/>
   );
 }
 

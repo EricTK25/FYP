@@ -1,14 +1,8 @@
 const hre = require("hardhat");
-<<<<<<< Updated upstream
-const mysql = require('mysql2/promise');
-const fs = require('fs');
-const config = require('../src/config.json');
-=======
 const Gun = require('gun');
 const config = require('../src/config.json');
 const fs = require('fs');
 const insertData = require('./insertData.js');
->>>>>>> Stashed changes
 
 const tokens = (n) => {
   return ethers.parseUnits(n.toString(), 'ether');
@@ -22,41 +16,6 @@ async function main() {
   let carrierapp;
 
   try {
-<<<<<<< Updated upstream
-    carrierapp = await hre.ethers.getContractAt("CarrierApp", targetAddress);
-    const connection = await mysql.createConnection({
-      host: '',
-      user: '',
-      password: '',
-      database: '',
-      port: ''
-    });
-
-    const [rows] = await connection.execute('SELECT * FROM carrierlist');
-    console.log("Fetched items:", rows);
-
-    for (let i = 0; i < rows.length; i++) {
-      const item = rows[i];
-      console.log(`Processing item ${i}:`, item); 
-      if (item.product_id === undefined || item.product_name === undefined || 
-          item.product_category === undefined || item.product_image === undefined || 
-          item.cost === undefined || item.stock === undefined) {
-        console.error(`Missing fields in row ${i}:`, item);
-        continue; 
-      }
-
-      const transaction = await carrierapp.connect(deployer).list(
-        item.product_id,
-        item.product_name,
-        item.product_category,
-        item.product_image,
-        tokens(item.cost), 
-        item.stock,
-      );
-      console.log(transaction);
-      await transaction.wait();
-      console.log(`Listed item ${item.product_id}: ${item.product_name}`);
-=======
     console.log("Target Address from Config:", targetAddress);
     console.log("Deploying CarrierApp contract...");
     let CarrierApp = await ethers.getContractFactory("CarrierApp");
@@ -79,7 +38,6 @@ async function main() {
       });
     
       console.log('Data insertion complete!');
->>>>>>> Stashed changes
     }
     
     // Run the insertion function

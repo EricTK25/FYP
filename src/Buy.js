@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
-import { useNavigate } from "react-router-dom";
 import Gun from "gun";
 import { useEthereum } from "./EthereumContext"; // Import EthereumContext globally
 
@@ -9,7 +8,6 @@ import CarrierApp from "./abis/CarrierApp.json";
 
 // Components
 import Navigation from "./components/Navigation";
-import HeroSection from "./components/HeroSection";
 import Section from "./components/Section";
 import FooterNavigation from "./components/FooterNavigation";
 
@@ -89,7 +87,7 @@ const Buy = () => {
   return (
     <div>
       <Navigation />
-      <HeroSection />
+      {/* <HeroSection /> */}
       <h2>Vehicle App Best Sellers</h2>
       {loading ? (
         <p>Loading...</p>

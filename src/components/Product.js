@@ -106,13 +106,7 @@ const Product = ({ item, provider, account, carrierapp, togglePop }) => {
           <img src={close} alt="Close" />
         </button>
       </div>
-<<<<<<< Updated upstream
     </div >
-=======
-    </div>
-    </div>
-    
->>>>>>> Stashed changes
   );
 }
 
