@@ -40,6 +40,29 @@ app.post('/api/profile/icon/:address', upload.single('icon'), (req, res) => {
   });
 });
 
+
+// 更新運送地址的 API
+app.put('/api/profile/address/:account', (req, res) => {
+  const { account } = req.params;
+  const { shippingAddress } = req.body;
+
+  if (!shippingAddress) {
+    return res.status(400).json({ error: 'Shipping address is required' });
+  }
+
+  const query = 'UPDATE profiles SET shippingAddress = ? WHERE address = ?';
+  db.query(query, [shippingAddress, account], (err, results) => {
+    if (err) {
+      console.error('Error updating shipping address:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    res.status(200).json({ message: 'Shipping address updated successfully' });
+  });
+});
+
 //get icon
 app.get('/api/profile/icon/:address', (req, res) => {
   const address = req.params.address;
@@ -53,6 +76,7 @@ app.get('/api/profile/icon/:address', (req, res) => {
     res.json({ icon: base64Image }); 
   });
 });
+
 
 //Profile
 app.post('/api/profile', (req, res) => {

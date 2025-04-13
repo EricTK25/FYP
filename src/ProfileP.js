@@ -14,11 +14,16 @@ const ProfileP = () => {
   const [isPrompted, setIsPrompted] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showEdit, setShowEdit] = useState(false); 
-  const [showIconUpload, setShowIconUpload] = useState(false); // 新增狀態來控制圖標上傳
+  const [showIconUpload, setShowIconUpload] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [profileIcon, setProfileIcon] = useState(null); 
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  
+
+
   const fetchProfile = async () => {
     if (account) {
       try {
@@ -28,6 +33,7 @@ const ProfileP = () => {
           setName(response.data[0].name);
           setEmail(response.data[0].email);
           setPhoneNumber(response.data[0].phoneNumber);
+          setShippingAddress(response.data[0].shippingAddress || '');
         } else if (!isPrompted) {
           setShowModal(true);
         }
@@ -90,8 +96,8 @@ const ProfileP = () => {
         },
       });
       alert("Icon uploaded successfully!");
-      fetchProfileIcon();
       setShowIconUpload(false);
+      fetchProfileIcon();
     } catch (error) {
       console.error("Icon uploaded failed:", error);
     }
@@ -116,7 +122,24 @@ const ProfileP = () => {
       console.error("Error submitting profile:", error);
     }
   };
+//shipping address form
+  const handleSaveAddress = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/profile/address/${account}`, {
+        shippingAddress,
+      });
+      console.log("Shipping address updated successfully");
+      setShowAddressForm(false); // 隱藏表單
+      fetchProfile(); // 重新獲取用戶資料以更新顯示
+    } catch (error) {
+      console.error("Error updating shipping address:", error.response ? error.response.data : error.message);
+    }
+  };
 
+  const toggleAddressForm = () => {
+    setShowAddressForm((prev) => !prev);
+  };
+  
 //edit profile
 const toggleEdit = () => {
   setShowEdit((prevShowEdit) => {
@@ -144,18 +167,6 @@ const toggleIconUpload = () => {
   });
 };
 
-const toggleShip = () => {
-  setShowEdit((prevShowEdit) => {
-    const newShowEdit = !prevShowEdit;
-    const editArrow = document.querySelector('.edit-arrow');
-    if (newShowEdit) {
-      editArrow.textContent = ' v ';
-    } else {
-      editArrow.textContent = ' > ';
-    }
-    return newShowEdit;
-  });
-};
 
 //logout wallet
   const handleLogout = () => {
@@ -195,6 +206,7 @@ const toggleShip = () => {
             <h3>{profile.name}</h3>
             <p>Email: {profile.email}</p>
             <p>Phone: {profile.phoneNumber}</p>
+            <p>Shipping Address: {shippingAddress ? shippingAddress : "Have not entered shipping address yet"}</p>
           
           {/* Options Section */}
           <section className="options-section">
@@ -240,11 +252,27 @@ const toggleShip = () => {
             {showIconUpload && (
                 <input type="file" accept="image/*" onChange={handleIconUpload} />
               )}
-            <div className="option" onClick={toggleShip}> 
-            <span>Shipping Address</span>
-            <span className="arrow ship-arrow"> > </span>
-            </div>
-
+            <div className="option" onClick={toggleAddressForm}> 
+  <span>Shipping Address</span>
+  <span className="arrow ship-arrow"> > </span>
+</div>
+{showAddressForm && (
+  <div className="address-form">
+    <label>Shipping Address:</label>
+    <input
+      type="text"
+      value={shippingAddress}
+      onChange={(e) => setShippingAddress(e.target.value)}
+      required
+    />
+    <button type="button" onClick={handleSaveAddress}>
+      Save Address
+    </button>
+    <button type="button" onClick={toggleAddressForm}>
+      Cancel
+    </button>
+  </div>
+)}
             <Link to="/selling-management" className="option">
               <span>Selling Management</span>
               <span className="arrow"> > </span>
