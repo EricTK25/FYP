@@ -8,6 +8,7 @@ import Navigation from "./components/Navigation";
 import axios from 'axios';
 
 
+
 const ProfileP = () => {
   const navigate = useNavigate();
   const { account, connectWallet,disconnectWallet} = useEthereum();
@@ -178,7 +179,8 @@ const toggleIconUpload = () => {
 //UI
   return (
     <div className="profile-page">
-     <Navigation/>
+      {/* Header */}
+   <Navigation/>
 
       {/* Profile Section */}
       <div className="profile-container">

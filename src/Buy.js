@@ -10,6 +10,7 @@ import CarrierApp from "./abis/CarrierApp.json";
 import Navigation from "./components/Navigation";
 import Section from "./components/Section";
 import FooterNavigation from "./components/FooterNavigation";
+import HeroSection from "./components/HeroSection";
 
 // Config
 import config from "./config.json";
@@ -87,7 +88,7 @@ const Buy = () => {
   return (
     <div>
       <Navigation />
-      {/* <HeroSection /> */}
+      <HeroSection />
       <h2>Vehicle App Best Sellers</h2>
       {loading ? (
         <p>Loading...</p>

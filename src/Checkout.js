@@ -39,10 +39,10 @@ const Checkout = () => {
         console.log(orderDetails);
     };
 
-    const buyHandler = async (id, cost) => {
+    const buyHandler = async (product_id, cost) => {
         try {
             const signer = await provider.getSigner();
-            let transaction = await contract.connect(signer).buy(id, { value: cost });
+            let transaction = await contract.connect(signer).buy(product_id, { value: cost });
             await transaction.wait();
             setTransactionHash(transaction.hash);
             setHasBought(true);
