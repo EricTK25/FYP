@@ -41,7 +41,7 @@ app.post('/api/profile/icon/:address', upload.single('icon'), (req, res) => {
 });
 
 
-// 更新運送地址的 API
+//shipping address
 app.put('/api/profile/address/:account', (req, res) => {
   const { account } = req.params;
   const { shippingAddress } = req.body;
