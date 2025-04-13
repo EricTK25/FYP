@@ -3,10 +3,8 @@ import { Link } from "react-router-dom";
 import "../src/profile.css"; 
 import { useEthereum } from './EthereumContext';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
-import FooterNavigation from "./components/FooterNavigation";
-import Navigation from "./components/Navigation";
 import axios from 'axios';
-
+import FooterNavigation from "./components/FooterNavigation";
 
 
 const ProfileP = () => {
@@ -180,8 +178,14 @@ const toggleIconUpload = () => {
   return (
     <div className="profile-page">
       {/* Header */}
-   <Navigation/>
-
+      <div className="navbar">
+        <span className="app-title">Vehicle App</span>
+        {account ? (
+          <span className="accountid">Connected: {account.slice(0, 6)}...{account.slice(-4)}</span>
+        ) : (
+          <button className="connect-wallet" onClick={connectWallet}>Connect Wallet</button>
+        )}
+      </div>
       {/* Profile Section */}
       <div className="profile-container">
         <div className="profile-picture">
