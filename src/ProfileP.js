@@ -129,8 +129,8 @@ const ProfileP = () => {
         shippingAddress,
       });
       console.log("Shipping address updated successfully");
-      setShowAddressForm(false); // 隱藏表單
-      fetchProfile(); // 重新獲取用戶資料以更新顯示
+      setShowAddressForm(false); 
+      fetchProfile(); 
     } catch (error) {
       console.error("Error updating shipping address:", error.response ? error.response.data : error.message);
     }
