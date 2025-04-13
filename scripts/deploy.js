@@ -3,6 +3,8 @@ const Gun = require('gun');
 const config = require('../src/config.json');
 const fs = require('fs');
 const insertData = require('./insertData.js');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 const tokens = (n) => {
   return ethers.parseUnits(n.toString(), 'ether');
@@ -12,8 +14,6 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   const networkId = "31337";
   const targetAddress = config[networkId]?.CarrierApp?.address;
-
-  let carrierapp;
 
   try {
     console.log("Target Address from Config:", targetAddress);
@@ -38,6 +38,39 @@ async function main() {
       });
     
       console.log('Data insertion complete!');
+    };
+    
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DBNAME,
+      port: process.env.DB_PORT
+    });
+
+    const [rows] = await connection.execute('SELECT * FROM carrierlist');
+    console.log("Fetched items:", rows);
+
+    for (let i = 0; i < rows.length; i++) {
+      const item = rows[i];
+      console.log(`Processing item ${i}:`, item);
+      if (!item.product_id || !item.product_name || !item.product_category ||
+          !item.product_image || item.cost === undefined || item.stock === undefined) {
+        console.error(`Missing fields in row ${i}:`, item);
+        continue; 
+      }
+
+      const transaction = await carrierapp.connect(deployer).list(
+        item.product_id,
+        item.product_name,
+        item.product_category,
+        item.product_image,
+        tokens(item.cost), 
+        item.stock,
+      );
+      console.log(transaction);
+      await transaction.wait();
+      console.log(`Listed item ${item.product_id}: ${item.product_name}`);
     }
     
     // Run the insertion function

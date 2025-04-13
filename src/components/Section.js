@@ -52,10 +52,7 @@ const Section = ({ title, items, cart, setCart }) => {
 
     return (
         <div className='cards__section'>
-            <h3 id ={title}>{title}</h3>
-
-            <hr/>
-
+            <h2>{title}</h2>
             <div className='cards'>
                 {items.map((item) => (
                     <div 

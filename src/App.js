@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
 import { ethers } from 'ethers'
 import "./App.css"; // Make sure to create a CSS file for styling
 
 // Components
-import Navigation from './components/Navigation'
-import Section from './components/Section'
-import Product from './components/Product'
+import Navigation from './components/Navigation';
+import HeroSection from "./components/HeroSection";
+import FooterNavigation from "./components/FooterNavigation";
 
 // ABIs
 import CarrierApp from './abis/CarrierApp.json'
@@ -16,16 +15,9 @@ import config from './config.json'
 import { useEthereum } from './EthereumContext';
 
 function App() {
-  const { account, connectWallet } = useEthereum();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [provider, setProvider] = useState(null)
-  const [carrierapp, setCarrierApp] = useState(null)
-  const [acc, setAccount] = useState(null)
-  const [car, setCar] = useState(null)
-  const [item, setItem] = useState({})
-  const [toggle, setToggle] = useState(false)
+  const [acc, setAccount] = useState(null);
 
   // Simulate fetching car data based on tokenId
   const fetchCars = async () => {
@@ -78,38 +70,37 @@ function App() {
     }, 2000);
   };
 
-  const togglePop = (item) => {
-    setItem(item)
-    toggle ? setToggle(false) : setToggle(true)
-  }
-  
-  const loadBlockchainData = async () => {
-    const provider = new ethers.BrowserProvider(window.ethereum)
-    setProvider(provider)
-    const network = await provider.getNetwork()
-    const carrierapp = new ethers.Contract(config[network.chainId].CarrierApp.address, CarrierApp, provider)
-    setCarrierApp(carrierapp)
-    console.log(await carrierapp.items(0))
-    const items = []
-    for (var i = 0; i < 9; i++) {
-      const item = await carrierapp.items(i+1)
-      items.push(item)
-    }
-
-    const car = items.filter((item) => item.category === 'Car')
-    setCar(car)
-  }
 
   useEffect(() => {
     fetchCars();
   }, []);
 
-  useEffect(() => {
-    loadBlockchainData();
-  }, []);
-
   return (
-    <Navigation/>
+    <div className="App">
+      {/* Navbar */}
+      <Navigation account={acc} setAccount={setAccount} />
+      {/* Hero Section  */}
+      <HeroSection/>
+      {/* Top Sellers Section */}
+      <h2 className="section-title">TOP SELLERS</h2>
+      <div className="car-list">
+        {loading ? (
+          <p>Loading cars...</p>
+        ) : (
+          cars.map((car) => (
+            <div key={car.tokenId} className="car-card">
+              <img src={car.image} alt={car.name} className="car-image" />
+              <h3>{car.name}</h3>
+              <p>${car.price}</p>
+              <button className="add-to-cart">purchase</button>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Footer */}
+      <FooterNavigation></FooterNavigation>
+    </div>
   );
 }
 

@@ -58,7 +58,12 @@ export function EthereumProvider({ children }) {
     }
   };
 
-  // Function to load all tokens from the contract
+  
+  const disconnectWallet = () => {
+    setAccount(null); 
+
+  };
+
   const loadTokens = async () => {
     try {
       if (!contract) return;
@@ -108,6 +113,7 @@ export function EthereumProvider({ children }) {
         account,
         allTokens,
         cart,
+        disconnectWallet,
         connectWallet,
         loadTokens,
         updateCart,
