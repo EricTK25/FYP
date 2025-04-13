@@ -5,10 +5,10 @@ contract CarrierApp {
     address public owner;
 
     struct Item {
-        uint256 id;
-        string name;
-        string category;
-        string image;
+        uint256 product_id;
+        string product_name;
+        string product_category;
+        string product_image;
         uint256 cost;
         uint256 stock;
     }
@@ -63,7 +63,12 @@ contract CarrierApp {
         orderCount[msg.sender]++;
         orders[msg.sender][orderCount[msg.sender]] = order;
         items[_id].stock = item.stock - 1;
+<<<<<<< Updated upstream
         emit Buy(msg.sender, orderCount[msg.sender],item.id);
+=======
+
+        emit Buy(msg.sender, orderCount[msg.sender], item.product_id);
+>>>>>>> Stashed changes
     }
 
     function withdraw() public onlyOwner{

@@ -6,9 +6,19 @@ import Regis from "./Regis";
 import ProfileP from "./ProfileP";
 import Search from "./Search";
 import reportWebVitals from './reportWebVitals';
+<<<<<<< Updated upstream
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AllTokens, MintToken, TokenDetail, Transactions} from './pages';
 import { EthereumProvider } from './EthereumContext';
+=======
+import Buy from './Buy';
+import Cart from './Cart';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { AllTokens, MintToken, TokenDetail, Transactions} from './pages';
+import { EthereumProvider } from './EthereumContext';
+import ProductDetail from './components/Product';
+import Checkout from './Checkout';
+>>>>>>> Stashed changes
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -44,6 +54,25 @@ const router = createBrowserRouter([
   {
     path: "/Search",
     element: <Search />
+<<<<<<< Updated upstream
+=======
+  },
+  {
+    path: "/Buy",
+    element: <Buy/>
+  },
+  {
+    path: "/product/:productId",
+    element: <ProductDetail />
+  },
+  {
+    path: "/Cart",
+    element: <Cart />
+  },
+  {
+    path:"/Checkout",
+    element:<Checkout/>
+>>>>>>> Stashed changes
   }
 ]);
 
