@@ -1,8 +1,8 @@
 const Gun = require('gun');
-const config = require('../config.json');
+const config = require('../src/config.json');
 const fs = require('fs');
-const insertData = require('../Config/insertData.js');
-const fetchData = require('../Script/fetchData.js');
+const insertData = require('../src/Config/insertData.js');
+const fetchData = require('../src/Script/FetchData.js');
 
 const tokens = (n) => {
   return ethers.parseUnits(n.toString(), 'ether');

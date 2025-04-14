@@ -1,4 +1,4 @@
-module.exports = function fetchData(gun,carrierapp,deployer,tokens) {
+module.exports = function(gun,carrierapp,deployer,tokens){
     // Fetch data from the Gun.js database
     gun.get('carrierlist').once(async (data) => {
         console.log("Fetched items from Gun.js:", data);

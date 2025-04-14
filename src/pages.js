@@ -15,7 +15,7 @@ export function AllTokens() {
     );
 }
 export function MintToken() {
-    const {account, contract, productCount, setProductCount, Contextcars, setContextcars} = useEthereum();
+    const {account, contract, productCount, setProductCount, contextcars, setContextcars} = useEthereum();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     
@@ -103,7 +103,7 @@ export function MintToken() {
     }
 
     const setItemToContextcars = (item) => {
-      const cars = Contextcars;
+      const cars = contextcars;
       cars.push({
         id: item.product_id.toString(),
         name: item.product_name,

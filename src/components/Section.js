@@ -5,7 +5,7 @@ import { useEthereum } from "../EthereumContext";
 import "../App.css";
 
 const Section = ({ title, items, cart, setCart }) => {
-    const { account, Contextcars } = useEthereum();
+    const { account, contextcars } = useEthereum();
     const navigate = useNavigate();
     const gunRef = React.useRef();
 
@@ -55,10 +55,7 @@ const Section = ({ title, items, cart, setCart }) => {
             <h2>{title}</h2>
             <div className='cards'>
                 {
-                    console.log("Contextcars",Contextcars)
-                }
-                {
-                Contextcars.map((item) => (
+                contextcars.map((item) => (
                     <div 
                         className='card' 
                         key={item.id || item.name} 

@@ -16,7 +16,7 @@ import HeroSection from "./components/HeroSection";
 import config from "./config.json";
 
 const Buy = () => {
-  const { account , Contextcars, setContextcars} = useEthereum(); 
+  const { account , contextcars, setContextcars} = useEthereum(); 
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cars, setCar] = useState([]); 
@@ -73,7 +73,7 @@ const Buy = () => {
         });
       }
       setCar(items);
-      if(Contextcars===null){
+      if(contextcars===null){
         setContextcars(items);
       }
     } catch (error) {
