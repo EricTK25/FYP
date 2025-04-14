@@ -55,6 +55,9 @@ const Section = ({ title, items, cart, setCart }) => {
             <h2>{title}</h2>
             <div className='cards'>
                 {
+                    console.log("Contextcars",Contextcars)
+                }
+                {
                 Contextcars.map((item) => (
                     <div 
                         className='card' 

@@ -76,7 +76,6 @@ const Buy = () => {
       if(Contextcars===null){
         setContextcars(items);
       }
-      setContextcars(items);
     } catch (error) {
       console.error("Error in loading blockchain data:", error);
     } finally {

@@ -14,7 +14,7 @@ export function EthereumProvider({ children }) {
   const [allTokens, setAllTokens] = useState([]);
   const [cart, setCart] = useState([]); // Store cart items for the user
   const [productCount, setProductCount] = useState(1);
-  const [Contextcars, setContextcars] = useState(null); 
+  const [Contextcars, setContextcars] = useState(null);
 
   const gun = Gun(); // Initialize GunDB instance
 
@@ -122,7 +122,7 @@ export function EthereumProvider({ children }) {
         loadTokens,
         updateCart,
         setProductCount,
-        setContextcars
+        setContextcars,
       }}
     >
       {children}
