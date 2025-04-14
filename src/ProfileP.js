@@ -73,9 +73,45 @@ const ProfileP = () => {
     navigate('/');
   };
 
-  const toggleEdit = () => setShowEdit(!showEdit);
-  const toggleIconUpload = () => setShowIconUpload(!showIconUpload);
-  const toggleAddressForm = () => setShowAddressForm(!showAddressForm);
+  const toggleEdit = () => {
+    setShowEdit((prevShowEdit) => {
+      const newShowEdit = !prevShowEdit;
+      const editArrow = document.querySelector('.edit-arrow');
+      if (newShowEdit) {
+        editArrow.textContent = ' v ';
+      } else {
+        editArrow.textContent = ' > ';
+      }
+      return newShowEdit;
+    });
+  };
+  const toggleIconUpload = () => {
+    setShowIconUpload((prevShowIconUpload) => {
+      const newShowIconUpload = !prevShowIconUpload;
+      const iconArrow = document.querySelector('.icon-arrow');
+      if (newShowIconUpload) {
+        iconArrow.textContent = ' v ';
+      } else {
+        iconArrow.textContent = ' > ';
+      }
+      return newShowIconUpload;
+    });
+  };
+
+  const toggleAddressForm = () => {
+    setShowAddressForm((prevShowAddress) => {
+      const newShowAddress = !prevShowAddress;
+      const AddressArrow = document.querySelector('.ship-arrow');
+      if (newShowAddress) {
+        AddressArrow.textContent = ' v ';
+      } else {
+        AddressArrow.textContent = ' > ';
+      }
+      return newShowAddress;
+    });
+  };
+  //const toggleIconUpload = () => setShowIconUpload(!showIconUpload);
+  //const toggleAddressForm = () => setShowAddressForm(!showAddressForm);
 
   return (
     <div className="profile-page">
@@ -91,9 +127,18 @@ const ProfileP = () => {
           )}
         </div>
       </div>
+      
+      <div className="profile-detail">
+        <h2>Profile</h2>
+        {profile.name ? (
+          <div>
+            <h3>{profile.name}</h3>
+            <p>Email: {profile.email}</p>
+            <p>Phone: {profile.phoneNumber}</p>
+            <p>Shipping Address: {profile.shippingAddress || "Have not entered shipping address yet"}</p>
 
-      {/* Orders Section */}
-      <section className="orders-section">
+  {/* Orders Section */}
+  <section className="orders-section">
         <h2 className="title">My Orders</h2>
         <div className="underline"></div>
         <div className="orders">
@@ -111,19 +156,12 @@ const ProfileP = () => {
           </div>
         </div>
       </section>
-      <div className="profile-detail">
-        <h2>Profile</h2>
-        {profile.name ? (
-          <div>
-            <h3>{profile.name}</h3>
-            <p>Email: {profile.email}</p>
-            <p>Phone: {profile.phoneNumber}</p>
-            <p>Shipping Address: {profile.shippingAddress || "Have not entered shipping address yet"}</p>
             <section className="options-section">
               <div className="option" onClick={toggleEdit}>
                 <span>Edit Profile</span>
                 <span className="arrow edit-arrow"> > </span>
               </div>
+              </section>
               {showEdit && (
                 <div className="edit-form">
                   <form>
@@ -153,19 +191,28 @@ const ProfileP = () => {
                   </form>
                 </div>
               )}
+               <section className="options-section">
               <div className="option" onClick={toggleIconUpload}>
                 <span>Edit Icon</span>
                 <span className="arrow icon-arrow"> > </span>
               </div>
+              </section>
               {showIconUpload && (
+                <div className="icon-upload">
+                  <br />
                 <input type="file" accept="image/*" onChange={handleIconUpload} />
+                <br />
+                </div>
               )}
+              <section className="options-section">
               <div className="option" onClick={toggleAddressForm}>
                 <span>Shipping Address</span>
                 <span className="arrow ship-arrow"> > </span>
               </div>
+              </section>
               {showAddressForm && (
                 <div className="address-form">
+                  <br />
                   <label>Shipping Address:</label>
                   <input
                     type="text"
@@ -175,17 +222,20 @@ const ProfileP = () => {
                   />
                   <button type="button" onClick={handleSaveProfile}>Save Address</button>
                   <button type="button" onClick={toggleAddressForm}>Cancel</button>
+                  <br />
                 </div>
               )}
+              <section className="options-section">
               <Link to="/selling-management" className="option">
                 <span>Selling Management</span>
                 <span className="arrow"> > </span>
               </Link>
+              </section>
+              <section className="options-section">
               <div className="option" onClick={handleLogout}>
                 <span>Logout</span>
-                <span className="arrow"> > </span>
               </div>
-            </section>
+              </section>
           </div>
         ) : (
           <h3>You haven't connected to the MetaMask wallet or entered your personal information!</h3>
