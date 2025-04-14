@@ -90,8 +90,8 @@ function App() {
           cars.map((car) => (
             <div key={car.tokenId} className="car-card">
               <img src={car.image} alt={car.name} className="car-image" />
-              <h3>{car.name}</h3>
-              <p>${car.price}</p>
+              <h4>{car.name}</h4>
+              <p>{car.price} ETH</p>
               <button className="add-to-cart">purchase</button>
             </div>
           ))

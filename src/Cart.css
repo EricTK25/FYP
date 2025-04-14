@@ -11,10 +11,12 @@
   .cart-content {
     display: flex;
     justify-content: space-between;
+    
   }
   
   .cart-items {
     flex: 2;
+    padding-right: 20px;
   }
   
   .cart-item {
@@ -52,6 +54,7 @@
     border: none;
     padding: 10px;
     cursor: pointer;
+    
   }
   
   .cart-summary {
