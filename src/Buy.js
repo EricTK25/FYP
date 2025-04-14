@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import Gun from "gun";
 import { useEthereum } from "./EthereumContext"; // Import EthereumContext globally
 
 // ABIs
@@ -16,38 +15,12 @@ import HeroSection from "./components/HeroSection";
 import config from "./config.json";
 
 const Buy = () => {
-  const { account } = useEthereum(); 
+  const { account } = useEthereum();
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [cars, setCar] = useState([]); 
-  const [cart, setCart] = useState([]); 
-  const gunRef = useRef(); 
+  const [cars, setCars] = useState([]);
+  const [cart, setCart] = useState([]);
 
-  if (!gunRef.current) {
-    gunRef.current = Gun();
-  }
-  const gun = gunRef.current;
-
-  // Load cart data from GunDB when the wallet connects
-  useEffect(() => {
-    if (account) {
-      const userNode = gun.get(`user_${account}`);
-      userNode.get("cart").once((cartData) => {
-        if (cartData) {
-          const cartArray = Object.keys(cartData)
-            .filter((key) => key.startsWith("item_"))
-            .map((key) => cartData[key]);
-          setCart(cartArray);
-          console.log(`Loaded cart for account ${account}:`, cartArray);
-        } else {
-          console.log(`No cart data found for account ${account}. Initializing an empty cart.`);
-          setCart([]);
-        }
-      });
-    }
-  }, [account, gun]);
-
-  // Load blockchain data (vehicles and metadata)
   const loadBlockchainData = async () => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -62,17 +35,23 @@ const Buy = () => {
       const totalItems = 9; 
       const items = [];
       for (let i = 0; i < totalItems; i++) {
-        const item = await carrierApp.items(i + 1);
-        items.push({
-          id: item.id.toString(),
-          name: item.name,
-          cost: ethers.formatUnits(item.cost.toString(), "ether"),
-          image: item.image,
-          stock: item.stock.toString(),
-          category: item.category,
-        });
+        try {
+          const item = await carrierApp.items(i + 1);
+          items.push({
+            id: item.product_id.toString(),
+            name: item.product_name,
+            category: item.product_category,
+            image: item.product_image,
+            cost: ethers.formatUnits(item.cost.toString(), "ether"),
+            stock: item.stock.toString(),
+            specification: item.specification,
+            highlights: item.highlights
+          });
+        } catch (innerError) {
+          console.error(`Error processing item ${i + 1}:`, innerError);
+        }
       }
-      setCar(items);
+      setCars(items);
     } catch (error) {
       console.error("Error in loading blockchain data:", error);
     } finally {

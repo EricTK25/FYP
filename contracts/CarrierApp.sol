@@ -10,6 +10,8 @@ contract CarrierApp {
         string product_image;
         uint256 cost;
         uint256 stock;
+        string specification; // New field
+        string highlights;    // New field
     }
 
     struct Order {
@@ -39,7 +41,9 @@ contract CarrierApp {
         string memory _category,
         string memory _image,
         uint256 _cost,
-        uint256 _stock
+        uint256 _stock,
+        string memory _specification, // New parameter
+        string memory _highlights     // New parameter
     ) public onlyOwner {
         Item memory item = Item(
             _id, 
@@ -47,7 +51,9 @@ contract CarrierApp {
             _category, 
             _image, 
             _cost, 
-            _stock
+            _stock,
+            _specification, // New field
+            _highlights     // New field
         );
 
         items[_id] = item;
@@ -73,8 +79,30 @@ contract CarrierApp {
         require(success, "Withdrawal failed");
     }
 
-    // New function to get product details
     function getProduct(uint256 _id) public view returns (Item memory) {
         return items[_id];
+    }
+
+    function getItemDetails(uint256 _id) public view returns (
+        uint256 id,
+        string memory name,
+        string memory category,
+        string memory image,
+        uint256 cost,
+        uint256 stock,
+        string memory specification, // New return value
+        string memory highlights      // New return value
+    ) {
+        Item memory item = items[_id];
+        return (
+            item.product_id,
+            item.product_name,
+            item.product_category,
+            item.product_image,
+            item.cost,
+            item.stock,
+            item.specification, // New field
+            item.highlights      // New field
+        );
     }
 }

@@ -19,7 +19,7 @@ async function main() {
     console.log("Target Address from Config:", targetAddress);
     console.log("Deploying CarrierApp contract...");
     let CarrierApp = await ethers.getContractFactory("CarrierApp");
-    let carrierapp = await CarrierApp.deploy();
+    carrierapp = await CarrierApp.deploy();
     await carrierapp.waitForDeployment();
     config[networkId] = { CarrierApp: { address: await carrierapp.getAddress() } };
     fs.writeFileSync('../FYP/src/config.json', JSON.stringify(config, null, 2));
@@ -36,20 +36,21 @@ async function main() {
           }
         });
       });
-    
+
       console.log('Data insertion complete!');
     }
-    
+
     // Run the insertion function
-    insertIntoGun();
+    await insertIntoGun();
+
     // Fetch data from the Gun.js database
     gun.get('carrierlist').once(async (data) => {
       console.log("Fetched items from Gun.js:", data);
-    
+
       for (const id in data) {
         const reference = data[id]['#']; // Get the reference to the item
         if (!reference) continue;
-    
+
         // Fetch the complete item data using the reference
         const fetchItemData = async () => {
           gun.get(reference).once(async (item) => {
@@ -57,16 +58,9 @@ async function main() {
               console.error(`Item ${id} not found`);
               return;
             }
-    
+
             console.log(`Processing item ${id}:`, item);
-    
-            // Ensure item has all necessary fields
-            if (!item.product_id || !item.product_name || !item.product_category ||
-                !item.product_image || item.cost === undefined || item.stock === undefined) {
-              console.error(`Missing fields in item ${id}:`, item);
-              return;
-            }
-    
+
             // List the item on the blockchain
             try {
               const transaction = await carrierapp.connect(deployer).list(
@@ -75,7 +69,9 @@ async function main() {
                 item.product_category,
                 item.product_image,
                 tokens(item.cost),
-                item.stock
+                item.stock,
+                item.specification, 
+                item.highlights  
               );
               console.log(transaction);
               await transaction.wait();
@@ -85,12 +81,10 @@ async function main() {
             }
           });
         };
-    
+
         await fetchItemData(); // Call the async function and await its completion
       }
     });
-    
-    
 
   } catch (error) {
     console.error("Error:", error);

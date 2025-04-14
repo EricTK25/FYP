@@ -34,31 +34,44 @@ const Search = () => {
   }, [cart]);
 
   useEffect(() => {
-    const loadBlockchainData = async () => {
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        setProvider(provider);
-        const network = await provider.getNetwork();
-        const carrierApp = new ethers.Contract(
-          config[network.chainId].CarrierApp.address,
-          CarrierApp,
-          provider
-        );
-
-        const totalItems = 9; 
-        const items = [];
-        for (let i = 0; i < totalItems; i++) {
-          const item = await carrierApp.items(i + 1);
-          items.push({
-            id: item.id.toString(),
-            name: item.name,
-            cost: ethers.formatUnits(item.cost.toString(), "ether"),
-            image: item.image,
-            stock: item.stock.toString(),
-            category: item.category,
-          });
-        }
-        setCar(items);
+   const loadBlockchainData = async () => {
+       try {
+         const provider = new ethers.BrowserProvider(window.ethereum);
+         setProvider(provider);
+         const network = await provider.getNetwork();
+         const carrierApp = new ethers.Contract(
+           config[network.chainId].CarrierApp.address,
+           CarrierApp,
+           provider
+         );
+   
+         const totalItems = 9;
+         const items = [];
+         for (let i = 0; i < totalItems; i++) {
+           const item = await carrierApp.items(i + 1);
+           console.log("Raw item data:", item);
+   
+           // Ensure all properties exist before accessing them
+   
+   
+           const formattedItem = {
+             id: item.id.toString(),
+             name: item.name,
+             category: item.category,
+             image: item.image,
+             cost: ethers.formatUnits(item.cost.toString(), "ether"),
+             stock: item.stock.toString(),
+             specification: {
+               fuel: item.fuel,
+               condition: item.condition
+             }
+           };
+   
+   
+           console.log("Formatted item data:", formattedItem);
+           items.push(formattedItem);
+         }
+         setCar(items);
         setDailyHighlights(items.sort(() => Math.random() - Math.random()).slice(0, 3));
       } catch (error) {
         console.error("Error loading vehicles:", error);

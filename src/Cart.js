@@ -10,6 +10,7 @@ import Navigation from "./components/Navigation";
 const Cart = ({ onRemoveFromCart, onCheckout }) => {
     const { account } = useEthereum();
     const [cart, setCart] = useState([]);
+    const [notification, setNotification] = useState({ visible: false, message: '' });
     const navigate = useNavigate();
 
     const gunRef = useRef();
@@ -98,30 +99,18 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
         if (onRemoveFromCart) {
             onRemoveFromCart(itemId);
         }
+        setNotification({ visible: true, message: 'Item removed from cart!' });
+        setTimeout(() => {
+            setNotification({ visible: false, message: '' });
+        }, 3000); // Hide notification after 3 seconds
     };
 
     const handleCheckout = () => {
         if (onCheckout) {
             onCheckout(cart);
         }
-        setCart([]);
-        if (account) {
-            const userCartNode = gun.get(`user_${account}`).get("cart");
-            userCartNode.put(null, (ack) => {
-                if (ack.err) {
-                    console.error("Error clearing cart in GunDB:", ack.err);
-
-                }
-                else {
-                    console.log(`Cart node cleared in GunDB for account ${account}.`);
-                }
-            });
-        }
-
         navigate("/checkout", { state: { cart } });
     };
-
-
 
     return (
         <div>
@@ -158,11 +147,15 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
                                 PROCEED TO CHECKOUT
                             </button>
                         </div>
-
                     </div>
                 )}
             </div>
             <FooterNavigation />
+            {notification.visible && (
+                <div className='notification'>
+                    {notification.message}
+                </div>
+            )}
         </div>
     );
 };

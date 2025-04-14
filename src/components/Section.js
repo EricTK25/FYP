@@ -1,17 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Gun from "gun";
 import { useEthereum } from "../EthereumContext";
+import { formatUnits } from "ethers"; // Import formatUnits from ethers
 import "../App.css";
 
 const Section = ({ title, items, cart, setCart }) => {
     const { account } = useEthereum();
     const navigate = useNavigate();
-    const gunRef = React.useRef();
+    const gunRef = useRef(Gun());
+    const [notification, setNotification] = useState({ visible: false, message: '' });
 
-    if (!gunRef.current) {
-        gunRef.current = Gun();
-    }
+    useEffect(() => {
+        if (!gunRef.current) {
+            gunRef.current = Gun();
+        }
+    }, []);
+
     const gun = gunRef.current;
 
     const onAddToCart = (item) => {
@@ -30,15 +35,20 @@ const Section = ({ title, items, cart, setCart }) => {
             userNode.get("cart").put(cartObject, (ack) => {
                 if (ack.err) {
                     console.error(`Error saving cart to GunDB for account ${account}:`, ack.err);
+                    alert("Failed to save cart. Please try again.");
                 } else {
                     console.log(`Cart successfully saved for account ${account}:`, cartObject);
+                    setNotification({ visible: true, message: `${item.product_name} added to cart!` });
+                    setTimeout(() => {
+                        setNotification({ visible: false, message: '' });
+                    }, 3000); // Hide notification after 3 seconds
                 }
             });
             return updatedCart;
         });
     };
-
     const handleCardClick = (item) => {
+        console.log("Item clicked:", item); // Add this line to log the item
         navigate(`/product/${item.id}`, {
             state: {
                 id: item.id,
@@ -46,10 +56,12 @@ const Section = ({ title, items, cart, setCart }) => {
                 cost: item.cost,
                 image: item.image,
                 stock: item.stock,
+                specification: item.specification 
             },
         });
     };
-
+    
+    
     return (
         <div className='cards__section'>
             <h2>{title}</h2>
@@ -57,15 +69,15 @@ const Section = ({ title, items, cart, setCart }) => {
                 {items.map((item) => (
                     <div 
                         className='card' 
-                        key={item.id || item.name} 
+                        key={item.id} 
                         onClick={() => handleCardClick(item)}
                     >
                         <div className='card__image'>
-                            <img src={item.image || 'placeholder.png'} alt={item.name || "Product"} />
+                            <img src={item.image || 'placeholder.png'} alt={item.product_name || "Product"} />
                         </div>
                         <div className='card__info'>
                             <h4>{item.name || "Unnamed Product"}</h4>
-                            <p>{item.cost ? `${item.cost} ETH` : "N/A"}</p>
+                            <p>{item.cost}</p>
                             <button 
                                 className='add-to-cart' 
                                 onClick={(e) => {
@@ -79,6 +91,11 @@ const Section = ({ title, items, cart, setCart }) => {
                     </div>
                 ))}
             </div>
+            {notification.visible && (
+                <div className='notification'>
+                    {notification.message}
+                </div>
+            )}
         </div>
     );
 }
