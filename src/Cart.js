@@ -138,7 +138,7 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
                                     <img src={item.image} alt={item.product_name || item.name} className="cart-item__image" />
                                     <div className="cart-item__info">
                                         <h4>{item.product_name || item.name}</h4>
-                                        <p>{item.cost}</p>
+                                        <p>Price: {item.cost} ETH</p>
                                     </div>
                                     <button
                                         className="remove-item"
@@ -150,7 +150,7 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
                             ))}
                         </div>
                         <div className="summary-box">
-                            <p>Subtotal: ${cart.reduce((total, item) => total + parseFloat(item.cost), 0).toFixed(2)}</p>
+                            <p>Subtotal: {cart.reduce((total, item) => total + parseFloat(item.cost), 0).toFixed(2)} ETH</p>
                             <label>
                                 <input type="checkbox" /> I agree to terms and refund policy
                             </label>

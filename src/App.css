@@ -40,14 +40,14 @@ body {
 .hero {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: 500px;
   overflow: hidden;
 }
 
 .hero-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; 
+  object-fit: contain;
   transition: opacity 0.5s ease-in-out; 
 }
 
@@ -138,16 +138,18 @@ body {
 
 .card__image img {
   max-width: 100%;
-  max-height: 100%; /* Ensure image fits within fixed height */
+  max-height: 100%;
+   /* Ensure image fits within fixed height */
   object-fit: cover; /* Maintain aspect ratio and cover area */
 }
+
 
 .card__info h4 {
   margin: 10px 0;
 }
 
 .card__info p {
-  font-size: 1.2em;
+  font-size: 1em;
   margin: 10px 0;
 }
 
@@ -181,6 +183,9 @@ body {
 
 .product-image img {
   max-width: 100%;
+  height: 500px;
+  overflow: hidden;
+  object-fit: contain;
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -275,4 +280,30 @@ body {
   .product__image {
     grid-column: span 2;
   }
+}
+
+.featured-brands {
+  margin-top: 30px;
+}
+
+.featured-brands h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.brands-container {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 10px;
+}
+
+.brands-container .brand-logo {
+  height: 100px;
+  width: 50%; 
+  margin-right: 10px; 
+}
+
+.brands-container .brand-logo:last-child {
+  margin-right: 0; 
 }

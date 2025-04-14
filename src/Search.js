@@ -104,6 +104,12 @@ const Search = () => {
               <img src="toyota.png" alt="Toyota" className="brand-logo" />
               <img src="honda.png" alt="Honda" className="brand-logo" />
               <img src="tesla.png" alt="Tesla" className="brand-logo" />
+              <img src="Audi.png" alt="Audi" className="brand-logo" />
+              <img src="BMW.webp" alt="BMW" className="brand-logo" />
+              <img src="DaeWoo.png" alt="DaeWoo" className="brand-logo" />
+              <img src="Ford.jpeg" alt="Ford" className="brand-logo" />
+              <img src="Holden.png" alt="Holden" className="brand-logo" />
+              <img src="jaguar.jpg" alt="jaguar" className="brand-logo" />
             </div>
           </div>
 
