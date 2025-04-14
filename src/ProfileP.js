@@ -1,92 +1,96 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
-import "../src/profile.css"; 
+import { Link, useNavigate } from 'react-router-dom';
+import "../src/profile.css";
 import { useEthereum } from './EthereumContext';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import FooterNavigation from "./components/FooterNavigation";
+import Navigation from './components/Navigation';
+import Gun from 'gun';
 
-
+const gun = Gun();
 
 const ProfileP = () => {
   const navigate = useNavigate();
-  const { account, connectWallet } = useEthereum();
-  const [profile, setProfile] = useState(null);
+  const { account, disconnectWallet } = useEthereum();
+  const [profile, setProfile] = useState({
+    name: '',
+    email: '',
+    phoneNumber: '',
+    profileIcon: null,
+    shippingAddress: ''
+  });
   const [isPrompted, setIsPrompted] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  
+  const [showEdit, setShowEdit] = useState(false);
+  const [showIconUpload, setShowIconUpload] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (account) {
-        try {
-          const response = await axios.get(`http://localhost:5000/api/profile/${account}`);
-          if (response.data.length > 0) {
-            setProfile(response.data[0]);
-          } else if (!isPrompted){
-            setShowModal(true);
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
+    if (account) {
+      setLoading(true);
+      const userNode = gun.get(`user_${account}`).get('profile');
+      userNode.once((data) => {
+        if (data) {
+          setProfile(data);
+        } else if (!isPrompted) {
+          setShowModal(true);
         }
-      }
+        setLoading(false);
+      });
+    }
+  }, [account, isPrompted]);
+
+  const handleSaveProfile = () => {
+    const userNode = gun.get(`user_${account}`).get('profile');
+    userNode.put(profile);
+    setShowEdit(false);
+  };
+
+  const handleIconUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result;
+      const userNode = gun.get(`user_${account}`).get('profile');
+      userNode.put({ profileIcon: base64String });
+      setProfile(prevProfile => ({ ...prevProfile, profileIcon: base64String }));
+      alert("Icon uploaded successfully!");
+      setShowIconUpload(false);
     };
+    reader.readAsDataURL(file);
+  };
 
-    fetchProfile();
-  }, [account]);
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const newProfile = { address: account, name, email, phoneNumber };
-    await axios.post('http://localhost:5000/api/profile', newProfile);
-    setProfile(newProfile);
+    const userNode = gun.get(`user_${account}`).get('profile');
+    userNode.put(profile);
     setIsPrompted(true);
-    setShowModal(false); 
+    setShowModal(false);
   };
 
+  const handleLogout = () => {
+    disconnectWallet();
+    navigate('/');
+  };
 
-  const handleregis = () => {
-    navigate('/'); 
-  };
-  const handleregis2 = () => {
-    navigate('/ProfileP'); 
-  };
+  const toggleEdit = () => setShowEdit(!showEdit);
+  const toggleIconUpload = () => setShowIconUpload(!showIconUpload);
+  const toggleAddressForm = () => setShowAddressForm(!showAddressForm);
+
   return (
     <div className="profile-page">
-      {/* Header */}
-      <div className="navbar">
-        <span className="app-title">Vehicle App</span>
-        {account ? (
-          <span className="accountid">Connected: {account.slice(0, 6)}...{account.slice(-4)}</span>
-        ) : (
-          <button className="connect-wallet" onClick={connectWallet}>Connect Wallet</button>
-        )}
-      </div>
-
-      {/* Profile Section */}
-      <div class="profile-container">
-        <div class="profile-picture">
-          <div class="camera-icon">
-            <i class="icon-camera">📷</i> 
-          </div>
+      <Navigation />
+      <div className="profile-container">
+        <div className="profile-picture">
+          {profile.profileIcon && (
+            <img
+              src={profile.profileIcon}
+              alt="Profile Icon"
+              style={{ width: '100px', height: '100px' }}
+            />
+          )}
         </div>
       </div>
-
-      <div className="profile-detail">
-      <h2>Profile</h2>
-      {profile ? (
-        <div>
-          <h3>{profile.name}</h3>
-          <p>Email: {profile.email}</p>
-          <p>Phone: {profile.phoneNumber}</p>
-        </div>
-      ) : ( <h3>
-        You haven't connected to the metamask wallet or entered your personal information!
-      </h3>
-      )}
-    </div>
-      
 
       {/* Orders Section */}
       <section className="orders-section">
@@ -107,77 +111,122 @@ const ProfileP = () => {
           </div>
         </div>
       </section>
-
-      {/* Options Section */}
-      <section className="options-section">
-        <Link to="/edit-profile" className="option">
-          <span>Edit Profile</span>
-          <span className="arrow"> > </span>
-          
-        </Link>
-        <Link to="/shipping-address" className="option">
-          <span>Shipping Address</span>
-          <span className="arrow"> > </span>
-          
-        </Link>
-        <Link to="/selling-management" className="option">
-          <span>Selling Management</span>
-          <span className="arrow"> > </span>
-          
-        </Link>
-        <Link to="/logout" className="option">
-          <span>Logout</span>
-          <span className="arrow"> > </span>
-          
-        </Link>
-      </section>
-
-      {/* Footer Navigation */}
-      <footer className="footer-nav">
-        <nav className="nav-bar">
-          <button className="nav-item"onClick={handleregis}>Home</button>
-          <button className="nav-item">Search</button>
-          <button className="nav-item">Sell</button>
-          <button className="nav-item">Cart</button>
-          <button className="nav-item"onClick={handleregis2}>Profile</button>
-        </nav>
-      </footer>
-
+      <div className="profile-detail">
+        <h2>Profile</h2>
+        {profile.name ? (
+          <div>
+            <h3>{profile.name}</h3>
+            <p>Email: {profile.email}</p>
+            <p>Phone: {profile.phoneNumber}</p>
+            <p>Shipping Address: {profile.shippingAddress || "Have not entered shipping address yet"}</p>
+            <section className="options-section">
+              <div className="option" onClick={toggleEdit}>
+                <span>Edit Profile</span>
+                <span className="arrow edit-arrow"> > </span>
+              </div>
+              {showEdit && (
+                <div className="edit-form">
+                  <form>
+                    <label>Name:</label>
+                    <input
+                      type="text"
+                      value={profile.name}
+                      onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                      required
+                    />
+                    <label>Email:</label>
+                    <input
+                      type="email"
+                      value={profile.email}
+                      onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                      required
+                    />
+                    <label>Phone:</label>
+                    <input
+                      type="tel"
+                      value={profile.phoneNumber}
+                      onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
+                      required
+                    />
+                    <button type="button" onClick={handleSaveProfile}>Save</button>
+                    <button type="button" onClick={toggleEdit}>Cancel</button>
+                  </form>
+                </div>
+              )}
+              <div className="option" onClick={toggleIconUpload}>
+                <span>Edit Icon</span>
+                <span className="arrow icon-arrow"> > </span>
+              </div>
+              {showIconUpload && (
+                <input type="file" accept="image/*" onChange={handleIconUpload} />
+              )}
+              <div className="option" onClick={toggleAddressForm}>
+                <span>Shipping Address</span>
+                <span className="arrow ship-arrow"> > </span>
+              </div>
+              {showAddressForm && (
+                <div className="address-form">
+                  <label>Shipping Address:</label>
+                  <input
+                    type="text"
+                    value={profile.shippingAddress}
+                    onChange={(e) => setProfile({ ...profile, shippingAddress: e.target.value })}
+                    required
+                  />
+                  <button type="button" onClick={handleSaveProfile}>Save Address</button>
+                  <button type="button" onClick={toggleAddressForm}>Cancel</button>
+                </div>
+              )}
+              <Link to="/selling-management" className="option">
+                <span>Selling Management</span>
+                <span className="arrow"> > </span>
+              </Link>
+              <div className="option" onClick={handleLogout}>
+                <span>Logout</span>
+                <span className="arrow"> > </span>
+              </div>
+            </section>
+          </div>
+        ) : (
+          <h3>You haven't connected to the MetaMask wallet or entered your personal information!</h3>
+        )}
+      </div>
+      <FooterNavigation />
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <div class="modal-header">
+            <div className="modal-header">
               <h2>Please enter your information</h2>
             </div>
             <form onSubmit={handleSubmit}>
               <div>
                 <label className='label-name'>Name</label>
-                <input 
-                  type="text" 
-                  placeholder="Please enter your name" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  required 
+                <input
+                  type="text"
+                  placeholder="Please enter your name"
+                  value={profile.name}
+                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                  required
                 />
               </div>
               <div>
                 <label>Email</label>
-                <input 
-                  type="email" 
-                  placeholder="Please enter your email"   
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  required 
+                <input
+                  type="email"
+                  placeholder="Please enter your email"
+                  value={profile.email}
+                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  required
                 />
               </div>
               <div>
                 <label>Phone</label>
-                <input 
-                  type="tel" 
-                  placeholder="Please enter your phone number"   
-                  value={phoneNumber} 
-                  onChange={(e) => setPhoneNumber(e.target.value)} 
-                  required 
+                <input
+                  type="tel"
+                  placeholder="Please enter your phone number"
+                  value={profile.phoneNumber}
+                  onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
+                  required
                 />
               </div>
               <button type="submit">Submit</button>

@@ -1,113 +1,133 @@
 import React, { useState, useEffect } from "react";
+import { ethers } from 'ethers';
 import "./Search.css";
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 
+// Components
+import FooterNavigation from "./components/FooterNavigation";
+import Navigation from './components/Navigation';
+import Section from "./components/Section";
+
+// ABIs
+import CarrierApp from './abis/CarrierApp.json';
+
+// Config
+import config from './config.json';
 
 const Search = () => {
-  const [tokenInfo, setTokenInfo] = useState(null); // State for token info
-  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [provider, setProvider] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(""); 
+  const [cars, setCar] = useState([]); 
+  const [filteredCars, setFilteredCars] = useState([]); 
+  const [dailyHighlights, setDailyHighlights] = useState([]); 
+  const [cart, setCart] = useState([]); 
+
+  // Load cart data from localStorage on initial load
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem("shoppingCart")) || [];
+    setCart(storedCart);
+  }, []);
+
+  // Save cart data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("shoppingCart", JSON.stringify(cart));
+  }, [cart]);
 
   useEffect(() => {
-    // Simulate fetching token info (replace with actual API call)
-    setTimeout(() => {
-      const token = true; // Simulate token info (replace with actual logic)
-      if (token) {
-        setTokenInfo({
-          cars: [
-            { id: 1, name: "ULTRABOOST 22 SHOES", price: "$1499" },
-            { id: 2, name: "ULTRABOOST 18 SHOES", price: "$1299" },
-            { id: 3, name: "ULTRABOOST 19 SHOES", price: "$1399" },
-            { id: 4, name: "ULTRABOOST 37 SHOES", price: "$1199" },
-          ],
-        });
+    const loadBlockchainData = async () => {
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        setProvider(provider);
+        const network = await provider.getNetwork();
+        const carrierApp = new ethers.Contract(
+          config[network.chainId].CarrierApp.address,
+          CarrierApp,
+          provider
+        );
+
+        const totalItems = 9; 
+        const items = [];
+        for (let i = 0; i < totalItems; i++) {
+          const item = await carrierApp.items(i + 1);
+          items.push({
+            id: item.id.toString(),
+            name: item.name,
+            cost: ethers.formatUnits(item.cost.toString(), "ether"),
+            image: item.image,
+            stock: item.stock.toString(),
+            category: item.category,
+          });
+        }
+        setCar(items);
+        setDailyHighlights(items.sort(() => Math.random() - Math.random()).slice(0, 3));
+      } catch (error) {
+        console.error("Error loading vehicles:", error);
+      } finally {
+        setLoading(false);
       }
-      setIsLoading(false);
-    }, 2000); // Simulate 2 seconds loading
+    };
+
+    loadBlockchainData();
   }, []);
-  const navigate = useNavigate();
-  
-  const handleregis = () => {
-    navigate('/'); 
+
+  useEffect(() => {
+    const filtered = cars.filter(vehicle => 
+      (vehicle.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredCars(filtered);
+  }, [searchTerm, cars]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
   };
-  const handleregis2 = () => {
-    navigate('/ProfileP'); 
-  };
-  const handlerSearch = () => {
-    navigate('/Search'); 
-  };
+
   return (
     <div className="app">
-      {/* Navbar */}
-      <div className="navbar">
-        <span className="app-title">Vehicle App</span>
-        <button className="connect-wallet">Connect Wallet</button>
-      </div>
+      <Navigation />
 
       {/* Search Bar */}
       <div className="search-bar">
-        <input type="text" placeholder="Search Your Vehicle" />
+        <input
+          type="text"
+          placeholder="Search Your Vehicle"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
       </div>
 
-      {/* Featured Brands */}
-      <section className="featured-brands">
-        <h2>Featured brands</h2>
-        <div className="brands">
-          <img src="Toyota.png" alt="Toyota" />
-          <img src="honda.png" alt="Honda" />
-          <img src="tesla.png" alt="Tesla" />
-        </div>
-      </section>
-
-      {/* Watercrafts and Planes */}
-      <section className="categories">
-        <div>
-          <h3>WaterCrafts / Ships</h3>
-          <div className="category-items">
-            <img src="kawasaki.png" alt="Kawasaki" />
-            <img src="cosco.png" alt="COSCO Shipping" />
+      {/* Conditionally Render Featured Brands and Daily Highlights */}
+      {searchTerm.trim() === "" && (
+        <>
+          <div className="featured-brands">
+            <h3>Featured Brands</h3>
+            <div className="brands-container">
+              <img src="toyota.png" alt="Toyota" className="brand-logo" />
+              <img src="honda.png" alt="Honda" className="brand-logo" />
+              <img src="tesla.png" alt="Tesla" className="brand-logo" />
+            </div>
           </div>
-        </div>
-        <div>
-          <h3>Planes</h3>
-          <div className="category-items">
-            <img src="cirrus.png" alt="Cirrus" />
-            <img src="bombardier.png" alt="Bombardier" />
-            <img src="embraer.png" alt="Embraer" />
-          </div>
-        </div>
-      </section>
 
-      {/* Daily Highlights */}
-      <section className="daily-highlights">
-        <h2>Daily Highlights</h2>
-        {isLoading ? (
-          <div className="loading">Loading cars...</div>
-        ) : tokenInfo ? (
-          <div className="car-grid">
-            {tokenInfo.cars.map((car) => (
-              <div key={car.id} className="car-card">
-                <img src="car-placeholder.png" alt={car.name} />
-                <h3>{car.name}</h3>
-                <p>{car.price}</p>
-                <button>Add to Cart</button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="no-data">No cars available</div>
-        )}
-      </section>
+          {/* Daily Highlights Section */}
+          <Section
+            title={"Daily Highlights"}
+            items={dailyHighlights}
+            cart={cart}
+            setCart={setCart}
+          />
+        </>
+      )}
 
-      {/* Footer Navigation */}
-      <footer className="footer-nav">
-        <div className="nav-bar">
-        <button className="nav-item"onClick={handleregis}>Home</button>
-          <button className="nav-item"onClick={handlerSearch}>Search</button>
-          <button className="nav-item">Sell</button>
-          <button className="nav-item">Cart</button>
-          <button className="nav-item"onClick={handleregis2}>Profile</button>
-        </div>
-      </footer>
+      {/* Conditionally Render Search Results */}
+      {searchTerm.trim() !== "" && (
+        <Section
+          title={"Search Results"}
+          items={filteredCars}
+          cart={cart}
+          setCart={setCart}
+        />
+      )}
+
+      <FooterNavigation />
     </div>
   );
 };

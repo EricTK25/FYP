@@ -38,10 +38,11 @@ CREATE TABLE `carrierlist` (
 
 CREATE TABLE profiles (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  address VARCHAR(42) UNIQUE NOT NULL,
+  address VARCHAR(255) NOT NULL UNIQUE,
   name VARCHAR(255),
   email VARCHAR(255),
-  phoneNumber VARCHAR(20)
+  phoneNumber VARCHAR(20),
+  icon_data LONGTEXT
 );
 
 --

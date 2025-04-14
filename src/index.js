@@ -6,10 +6,12 @@ import ProfileP from "./ProfileP";
 import Search from "./Search";
 import reportWebVitals from './reportWebVitals';
 import Buy from './Buy';
+import Cart from './Cart';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AllTokens, MintToken, TokenDetail, Transactions} from './pages';
 import { EthereumProvider } from './EthereumContext';
 import ProductDetail from './components/Product';
+import Checkout from './Checkout';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -54,6 +56,14 @@ const router = createBrowserRouter([
     path: "/product/:productId",
     element: <ProductDetail />
   },
+  {
+    path: "/Cart",
+    element: <Cart />
+  },
+  {
+    path:"/Checkout",
+    element:<Checkout/>
+  }
 ]);
 
 root.render(

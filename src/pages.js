@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useEthereum } from './EthereumContext';
+const Gun = require('gun');
+const insertData = require('./Config/insertData.js');
 
 export function AllTokens() {
     const { allTokens, loadTokens } = useEthereum();
@@ -13,7 +15,7 @@ export function AllTokens() {
     );
 }
 export function MintToken() {
-    const { account, contract } = useEthereum();
+    const {account, contract, productCount, setProductCount, Contextcars, setContextcars} = useEthereum();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     
@@ -52,13 +54,13 @@ export function MintToken() {
           carrierName: formData.carrierName,
           carrierType: formData.carrierType,
           registrationNumber: formData.registrationNumber,
-          price: ethers.parseEther(formData.price.toString()), // Convert to wei
+          price: ethers.parseEther(formData.price.toString()),
           year: formData.year,
           txSucCount: 0
         };
   
         // Send transaction
-        const tx = await contract.mintToken(carrierData); // 假設合約有addCarrier方法
+        const tx = await contract.mintToken(carrierData);
         await tx.wait();
         
         // Reset form
@@ -70,6 +72,8 @@ export function MintToken() {
         });
         
         alert('Carrier Token created successfully!');
+
+        CreateCarrierToBuyList();
       } catch (err) {
         console.error('Contract call failed:', err);
         setError(err.message || 'Failed to create carrier');
@@ -77,6 +81,39 @@ export function MintToken() {
         setIsSubmitting(false);
       }
     };
+
+    const CreateCarrierToBuyList = async () => {
+      const item = {
+        product_id: insertData.length + productCount,
+        product_name: formData.carrierName,
+        product_category: formData.carrierType,
+        product_image: 'https://purepng.com/public/uploads/large/black-edition-audi-luxury-car-1nm.png',
+        cost: Number(ethers.parseEther(formData.price.toString())),
+        stock: 1,
+      };
+      setProductCount(productCount + 1);
+      const gun = Gun({ peers: ['http://localhost:8765/gun'] });
+      gun.get('carrierlist').get(item.product_id).put(item, (ack) => {
+        if (ack.err)
+          console.error('Error inserting item:', ack.err);
+        else 
+          console.log(`Inserted product ID ${item.product_id}: ${item.product_name}`);
+      });
+      setItemToContextcars(item);
+    }
+
+    const setItemToContextcars = (item) => {
+      const cars = Contextcars;
+      cars.push({
+        id: item.product_id.toString(),
+        name: item.product_name,
+        cost: ethers.formatUnits(item.cost.toString(), "ether"),
+        image: item.product_image,
+        stock: item.stock.toString(),
+        category: item.product_category
+      });
+      setContextcars(cars);
+    }
   
     return (
       <div className="carrier-form">

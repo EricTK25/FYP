@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { ethers } from 'ethers'
 import "./App.css"; // Make sure to create a CSS file for styling
 
 // Components
@@ -7,12 +6,6 @@ import Navigation from './components/Navigation';
 import HeroSection from "./components/HeroSection";
 import FooterNavigation from "./components/FooterNavigation";
 
-// ABIs
-import CarrierApp from './abis/CarrierApp.json'
-
-// Config
-import config from './config.json'
-import { useEthereum } from './EthereumContext';
 
 function App() {
   const [cars, setCars] = useState([]);

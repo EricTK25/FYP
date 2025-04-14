@@ -20,7 +20,7 @@ function FooterNavigation(){
                     <MdSell className="icon" />
                     <span className="nav-text">Sell</span>
                 </button>
-                <button className="nav-item">
+                <button className="nav-item" onClick={()=> navigate('/Cart')}>
                     <FaShoppingCart className="icon" />
                     <span className="nav-text">Cart</span>
                 </button>

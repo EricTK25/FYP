@@ -115,7 +115,7 @@ body {
 
 /* Options Section */
 .options-section {
-    padding: 15px; /* Reduced padding */
+  padding: 10px; /* Reduced padding */
     background-color: #f4c20d;
 }
 
@@ -226,3 +226,6 @@ body {
     }
 
   
+.edit-form{
+  padding: 10px;
+}
