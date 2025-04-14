@@ -5,7 +5,7 @@ import { useEthereum } from './EthereumContext';
 import FooterNavigation from "./components/FooterNavigation";
 import Navigation from './components/Navigation';
 import Gun from 'gun';
-
+import axios from 'axios';
 const gun = Gun();
 
 const ProfileP = () => {
@@ -25,6 +25,7 @@ const ProfileP = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
+
   useEffect(() => {
     if (account) {
       setLoading(true);
@@ -43,6 +44,7 @@ const ProfileP = () => {
   const handleSaveProfile = () => {
     const userNode = gun.get(`user_${account}`).get('profile');
     userNode.put(profile);
+    alert("Information uploaded successfully!");
     setShowEdit(false);
   };
 
@@ -98,6 +100,26 @@ const ProfileP = () => {
     });
   };
 
+  const handleSaveAddress = () => {
+    const userNode = gun.get(`user_${account}`).get('profile');
+  
+    userNode.once((data) => {
+      if (!data) {
+        console.error("Profile not found");
+        return;
+      }
+
+      userNode.put({ shippingAddress: profile.shippingAddress }, (ack) => {
+        if (ack.err) {
+          console.error("Error updating shipping address:", ack.err);
+        } else {
+          console.log("Shipping address updated successfully");
+          setShowAddressForm(false);
+        }
+      });
+    });
+  };
+  
   const toggleAddressForm = () => {
     setShowAddressForm((prevShowAddress) => {
       const newShowAddress = !prevShowAddress;
@@ -127,7 +149,7 @@ const ProfileP = () => {
           )}
         </div>
       </div>
-      
+
       <div className="profile-detail">
         <h2>Profile</h2>
         {profile.name ? (
@@ -220,7 +242,7 @@ const ProfileP = () => {
                     onChange={(e) => setProfile({ ...profile, shippingAddress: e.target.value })}
                     required
                   />
-                  <button type="button" onClick={handleSaveProfile}>Save Address</button>
+                  <button type="button" onClick={handleSaveAddress}>Save Address</button>
                   <button type="button" onClick={toggleAddressForm}>Cancel</button>
                   <br />
                 </div>

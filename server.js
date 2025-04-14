@@ -38,6 +38,32 @@ app.get('/api/profile/:address', (req, res) => {
   });
 });
 
+//shipping address update API
+app.put('/api/profile/address/:account', (req, res) => {
+  const { account } = req.params;
+  const { shippingAddress } = req.body;
+
+  if (!shippingAddress) {
+    return res.status(400).json({ error: 'Shipping address is required' });
+  }
+
+  const userNode = gun.get(`user_${account}`).get('profile');
+
+  userNode.once((data) => {
+    if (!data) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    userNode.put({ shippingAddress }, (ack) => {
+      if (ack.err) {
+        console.error('Error updating shipping address:', ack.err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.status(200).json({ message: 'Shipping address updated successfully' });
+    });
+  });
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
