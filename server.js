@@ -64,6 +64,33 @@ app.put('/api/profile/address/:account', (req, res) => {
   });
 });
 
+//updata profile API
+app.put('/api/profile/address:account', (req, res) => {
+  const { account } = req.params;
+  const { name, email, phoneNumber } = req.body;
+
+  if (!name || !email || !phoneNumber) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const userNode = gun.get(`user_${account}`).get('profile');
+
+  userNode.once((data) => {
+    if (!data) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    userNode.put({ name, email, phoneNumber }, (ack) => {
+      if (ack.err) {
+        console.error('Error updating profile:', ack.err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.status(200).json({ message: 'Profile updated successfully' });
+    });
+  });
+});
+
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

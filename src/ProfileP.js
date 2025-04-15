@@ -43,9 +43,18 @@ const ProfileP = () => {
 
   const handleSaveProfile = () => {
     const userNode = gun.get(`user_${account}`).get('profile');
-    userNode.put(profile);
-    alert("Information uploaded successfully!");
-    setShowEdit(false);
+    userNode.put({
+      name: profile.name,
+      email: profile.email,
+      phoneNumber: profile.phoneNumber,
+    }, (ack) => {
+      if (ack.err) {
+        alert("Error uploading information!");
+      } else {
+        alert("Information uploaded successfully!");
+        setShowEdit(false);
+      }
+    });
   };
 
   const handleIconUpload = (e) => {
@@ -66,7 +75,7 @@ const ProfileP = () => {
     e.preventDefault();
     const userNode = gun.get(`user_${account}`).get('profile');
     userNode.put(profile);
-    setIsPrompted(true);
+          setIsPrompted(true);
     setShowModal(false);
   };
 
