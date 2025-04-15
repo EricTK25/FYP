@@ -116,7 +116,7 @@ export function EthereumProvider({ children }) {
         allTokens,
         cart,
         productCount,
-        Contextcars,
+        contextcars,
         disconnectWallet,
         connectWallet,
         loadTokens,
