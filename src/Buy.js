@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import Gun from "gun";
 import { useEthereum } from "./EthereumContext"; // Import EthereumContext globally
+import { useEthereum } from "./EthereumContext";
 
 // ABIs
 import CarrierApp from "./abis/CarrierApp.json";
@@ -19,9 +20,9 @@ const Buy = () => {
   const { account , contextcars, setContextcars} = useEthereum(); 
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [cars, setCar] = useState([]); 
-  const [cart, setCart] = useState([]); 
-  const gunRef = useRef(); 
+  const [cars, setCars] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [error, setError] = useState(null);
 
   if (!gunRef.current) {
     gunRef.current = Gun();
@@ -50,40 +51,73 @@ const Buy = () => {
   // Load blockchain data (vehicles and metadata)
   const loadBlockchainData = async () => {
     try {
+      if (!window.ethereum) {
+        setError("MetaMask is not installed");
+        return;
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
       const network = await provider.getNetwork();
+      const chainId = network.chainId.toString();
+
+      if (!config[chainId]?.CarrierApp?.address) {
+        setError(`Contract not deployed on network ${chainId}`);
+        return;
+      }
+
       const carrierApp = new ethers.Contract(
-        config[network.chainId].CarrierApp.address,
+        config[chainId].CarrierApp.address,
         CarrierApp,
         provider
       );
 
-      const totalItems = 9; 
       const items = [];
-      for (let i = 0; i < totalItems; i++) {
-        const item = await carrierApp.items(i + 1);
-        items.push({
-          id: item.id.toString(),
-          name: item.name,
-          cost: ethers.formatUnits(item.cost.toString(), "ether"),
-          image: item.image,
-          stock: item.stock.toString(),
-          category: item.category,
-        });
+      let id = 1;
+      while (true) {
+        try {
+          const item = await carrierApp.getProduct(id);
+          items.push({
+            id: item.product_id.toString(),
+            name: item.name,
+            category: item.category,
+            image: item.image,
+            cost: ethers.formatUnits(item.cost.toString(), "ether"),
+            stock: item.stock.toString(),
+            specification: {
+              color: item.specs.color,
+              engine_power: item.specs.engine_power,
+              fuel: item.specs.fuel,
+              interior: item.specs.interior,
+              mileage: item.specs.mileage,
+              condition: item.specs.condition,
+              cubic_capacity: item.specs.cubic_capacity,
+            },
+            highlights: item.highlights,
+          });
+          id++;
+        } catch (innerError) {
+          if (innerError.reason?.includes("ItemNotFound")) {
+            break; // Stop when no more items exist
+          }
+          console.error(`Error fetching item ${id}:`, innerError);
+          id++;
+          if (id > 100) break; // Safety limit to prevent infinite loops
+        }
       }
-      setCar(items);
-      if(contextcars===null){
-        setContextcars(items);
+
+      if (items.length === 0) {
+        setError("No items found in the contract");
+      } else {
+        setCars(items);
       }
     } catch (error) {
-      console.error("Error in loading blockchain data:", error);
+      console.error("Error loading blockchain data:", error);
+      setError("Failed to load data from blockchain");
     } finally {
       setLoading(false);
     }
   };
-  
-  // Load blockchain data on component mount
   useEffect(() => {
     loadBlockchainData();
   }, []);
@@ -95,6 +129,8 @@ const Buy = () => {
       <h2>Vehicle App Best Sellers</h2>
       {loading ? (
         <p>Loading...</p>
+      ) : error ? (
+        <p style={{ color: "red" }}>{error}</p>
       ) : (
         <Section
           title={"Cars"}
@@ -106,6 +142,6 @@ const Buy = () => {
       <FooterNavigation />
     </div>
   );
-}
+};
 
 export default Buy;
