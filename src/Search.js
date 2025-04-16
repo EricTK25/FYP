@@ -34,6 +34,7 @@ const Search = () => {
     localStorage.setItem("shoppingCart", JSON.stringify(cart));
   }, [cart]);
 
+  // Load blockchain data
   useEffect(() => {
     const loadBlockchainData = async () => {
       try {
@@ -63,6 +64,12 @@ const Search = () => {
         while (true) {
           try {
             const item = await carrierApp.getProduct(id);
+            console.log(`Raw item ${id}:`, item);
+            if (!item.name || item.name.trim() === "") {
+              console.warn(`Skipping item ${id} due to missing name`);
+              id++;
+              continue;
+            }
             const formattedItem = {
               id: item.product_id.toString(),
               name: item.name,
@@ -98,6 +105,7 @@ const Search = () => {
           setError("No vehicles found in the contract");
         } else {
           setCars(items);
+          setFilteredCars(items); // Initialize filteredCars
           setDailyHighlights(items.sort(() => Math.random() - 0.5).slice(0, 3));
         }
       } catch (error) {
@@ -111,14 +119,23 @@ const Search = () => {
     loadBlockchainData();
   }, []);
 
+  // Filter cars based on search term
   useEffect(() => {
-    const filtered = cars.filter((vehicle) =>
-      (vehicle.name || "").toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    console.log("Search term:", searchTerm);
+    console.log("Cars:", cars);
+    const filtered = cars.filter((vehicle) => {
+      if (!vehicle.name || vehicle.name.trim() === "") {
+        console.warn(`Vehicle with ID ${vehicle.id} has no name`);
+        return false;
+      }
+      return vehicle.name.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+    console.log("Filtered cars:", filtered);
     setFilteredCars(filtered);
   }, [searchTerm, cars]);
 
   const handleSearchChange = (event) => {
+    console.log("Input value:", event.target.value);
     setSearchTerm(event.target.value);
   };
 
@@ -151,33 +168,31 @@ const Search = () => {
               <div className="featured-brands">
                 <h3>Featured Brands</h3>
                 <div className="brands-container">
-                <img src="toyota.png" alt="Toyota" className="brand-logo" />
-               <img src="honda.png" alt="Honda" className="brand-logo" />
-               <img src="tesla.png" alt="Tesla" className="brand-logo" />
-               <img src="Audi.png" alt="Audi" className="brand-logo" />
-               <img src="BMW.webp" alt="BMW" className="brand-logo" />
-               <img src="DaeWoo.png" alt="DaeWoo" className="brand-logo" />
-               <img src="Ford.jpeg" alt="Ford" className="brand-logo" />
-               <img src="Holden.png" alt="Holden" className="brand-logo" />
-               <img src="jaguar.jpg" alt="jaguar" className="brand-logo" />
+                  <img src="toyota.png" alt="Toyota" className="brand-logo" />
+                  <img src="honda.png" alt="Honda" className="brand-logo" />
+                  <img src="tesla.png" alt="Tesla" className="brand-logo" />
+                  <img src="Audi.png" alt="Audi" className="brand-logo" />
+                  <img src="BMW.webp" alt="BMW" className="brand-logo" />
+                  <img src="DaeWoo.png" alt="DaeWoo" className="brand-logo" />
+                  <img src="Ford.jpeg" alt="Ford" className="brand-logo" />
+                  <img src="Holden.png" alt="Holden" className="brand-logo" />
+                  <img src="jaguar.jpg" alt="jaguar" className="brand-logo" />
                 </div>
               </div>
               <div className="watercrafts-ships">
                 <h3>WaterCrafts / Ships</h3>
                 <div className="brands-container">
-                <img src="Kawasaki.png" alt="Kawasaki" className="brand-logo" />
-               <img src="yamaha.jpg" alt="yamaha" className="brand-logo" />
-               <img src="cosco.png" alt="cosco" className="brand-logo" />
-   
+                  <img src="Kawasaki.png" alt="Kawasaki" className="brand-logo" />
+                  <img src="yamaha.jpg" alt="yamaha" className="brand-logo" />
+                  <img src="cosco.png" alt="cosco" className="brand-logo" />
                 </div>
               </div>
               <div className="planes">
                 <h3>Planes</h3>
                 <div className="brands-container">
-                <img src="cirrus.png" alt="cirrus" className="brand-logo" />
-               <img src="Bombardier.png" alt="Bombardier" className="brand-logo" />
-               <img src="Embraer.png" alt="Embraer" className="brand-logo" />
-      
+                  <img src="cirrus.png" alt="cirrus" className="brand-logo" />
+                  <img src="Bombardier.png" alt="Bombardier" className="brand-logo" />
+                  <img src="Embraer.png" alt="Embraer" className="brand-logo" />
                 </div>
               </div>
 

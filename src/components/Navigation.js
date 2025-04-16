@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Gun from "gun";
-import { Link } from 'react-router-dom';
 import { useEthereum } from '../EthereumContext';
 
 function Navigation() {
     const { account, connectWallet } = useEthereum();
     const gun = Gun();
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         if (account) {
@@ -21,15 +21,29 @@ function Navigation() {
         }
     }, [account]);
 
+    const handleButtonClick = async () => {
+        if (account) {
+            try {
+                await navigator.clipboard.writeText(account);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+            } catch (err) {
+                console.error("Failed to copy address:", err);
+            }
+        } else {
+            connectWallet();
+        }
+    };
+
     return (
         <div className="Navigation">
             <div className="navbar">
-                <span className="app-title">Vehicle App</span>
-                {account ? (
-                    <span>Connected: {account.slice(0,6)}...{account.slice(-4)}</span>
-                ) : (
-                    <button className="connect-wallet" onClick={connectWallet}>Connect Wallet</button>
-                )}
+                <div className="navbar-left">
+                    <span className="app-title">Vehicle App</span>
+                </div>
+                <button className="connect-wallet" onClick={handleButtonClick}>
+                    {copied ? "Copied!" : account ? `${account.slice(0,6)}...${account.slice(-4)}` : "Connect Wallet"}
+                </button>
             </div>
         </div>
     );

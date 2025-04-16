@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useEthereum } from "./EthereumContext";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { parseUnits, formatEther } from "ethers";
+import { useCart } from "./CartContext";
 import Navigation from "./components/Navigation";
 import FooterNavigation from "./components/FooterNavigation";
 import CheckoutInfo from "./components/CheckOutInfo";
 import { loadBlockchainData, buyHandler } from "./utils/blockchain";
 import { generateAndStoreDocument } from "./utils/document";
-import { clearCart } from "./utils/cart";
-import Gun from 'gun';
+import Gun from "gun";
 import "./Checkout.css";
-const gun = Gun();
+
 const Checkout = () => {
   const { account } = useEthereum();
-  const location = useLocation();
-  const { cart } = location.state || {};
+  const { cart, setCart } = useCart();
+  const navigate = useNavigate();
+  const gunRef = useRef(Gun({ peers: [process.env.REACT_APP_GUN_PEER || "http://localhost:8765/gun"] }));
+  const timeoutRef = useRef(null);
   const [transactionHash, setTransactionHash] = useState(null);
   const [hasBought, setHasBought] = useState(false);
   const [carrierapp, setCarrierApp] = useState(null);
@@ -23,35 +25,62 @@ const Checkout = () => {
   const [notification, setNotification] = useState({ visible: false, message: "" });
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [documentCids, setDocumentCids] = useState([]);
-  const [shippingAddress, setShippingAddress] = useState('');
-  const navigate = useNavigate();
+  const [shippingAddress, setShippingAddress] = useState("");
 
   useEffect(() => {
     if (account) {
-      const userNode = gun.get(`user_${account}`).get('profile');
+      const userNode = gunRef.current.get(`user_${account}`).get("profile");
       userNode.once((data) => {
         if (data) {
-          setShippingAddress(data.shippingAddress);
+          setShippingAddress(data.shippingAddress || "");
+        }
+      });
+      gunRef.current.get(`user_${account}`).get("cart").map().once((data, key) => {
+        if (data) {
+          setCart((prev) => {
+            if (!prev.some((item) => item.id === data.id)) {
+              return [...prev, data];
+            }
+            return prev;
+          });
         }
       });
     }
-  }, [account]);
+  }, [account, setCart]);
 
   useEffect(() => {
     loadBlockchainData({ setProvider, setCarrierApp, setDocumentRegistry, setNotification });
+    return () => gunRef.current?.off();
   }, []);
+
+  const showNotification = (message) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setNotification({ visible: true, message });
+    timeoutRef.current = setTimeout(() => {
+      setNotification({ visible: false, message: "" });
+    }, 5000);
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    if (account && gunRef.current) {
+      gunRef.current.get(`user_${account}`).get("cart").put(null);
+    }
+    showNotification("Cart cleared after successful purchase.");
+    navigate("/order-history");
+  };
 
   const handlePurchase = async () => {
     if (!carrierapp || !provider || !documentRegistry) {
-      setNotification({ visible: true, message: "Blockchain not initialized!" });
+      showNotification("Blockchain not initialized!");
       return;
     }
     if (!cart || cart.length === 0) {
-      setNotification({ visible: true, message: "Cart is empty!" });
+      showNotification("Cart is empty!");
       return;
     }
     if (!account) {
-      setNotification({ visible: true, message: "Please connect your wallet!" });
+      showNotification("Please connect your wallet!");
       return;
     }
 
@@ -66,7 +95,6 @@ const Checkout = () => {
           throw new Error(`Invalid product ID: ${item.id}`);
         }
 
-        // Validate product existence and stock
         let product;
         try {
           product = await carrierapp.getProduct(productId);
@@ -94,6 +122,10 @@ const Checkout = () => {
         console.log(`Purchasing product ${productId} for ${cartCost} ETH (${costInWei.toString()} Wei)`);
         const { transaction, orderId } = await buyHandler(productId, costInWei, provider, carrierapp);
 
+        const highlights = Array.isArray(item.highlights)
+          ? item.highlights.join(", ")
+          : item.highlights ?? product.highlights ?? "N/A";
+
         const cid = await generateAndStoreDocument(
           transaction,
           productId,
@@ -101,7 +133,7 @@ const Checkout = () => {
             ...item,
             specs: item.specification || product.specs,
             category: item.category || product.category,
-            highlights: item.highlights || product.highlights,
+            highlights,
             product_name: item.name,
           },
           orderId,
@@ -111,6 +143,19 @@ const Checkout = () => {
         );
         if (cid) {
           cids.push({ productId, orderId, cid });
+          if (account && gunRef.current) {
+            const orderTime = new Date().toISOString(); // Use ISO string for consistency
+            gunRef.current
+              .get(`user_${account}`)
+              .get("orders")
+              .get(orderId.toString())
+              .put({
+                txHash: transaction.hash,
+                orderTime,
+                productId,
+              });
+            console.log(`Stored order ${orderId} with txHash ${transaction.hash} and orderTime ${orderTime} in GunDB`);
+          }
         }
       }
 
@@ -118,20 +163,13 @@ const Checkout = () => {
       setDocumentCids(cids);
       setHasBought(true);
 
-      setNotification({
-        visible: true,
-        message: "Purchase successful! Receipt downloaded locally.",
-      });
-
-      clearCart(account, navigate, setNotification);
+      showNotification("Purchase successful! Receipt downloaded locally.");
+      clearCart();
     } catch (error) {
       console.error("Purchase failed:", error);
-      setNotification({ visible: true, message: error.message || "Purchase failed. Please try again." });
+      showNotification(error.message || "Purchase failed. Please try again.");
     } finally {
       setIsPurchasing(false);
-      setTimeout(() => {
-        setNotification({ visible: false, message: "" });
-      }, 5000);
     }
   };
 
@@ -155,7 +193,7 @@ const Checkout = () => {
         />
       )}
       {notification.visible && (
-        <div className="notification">
+        <div className="notification" role="alert" aria-live="polite">
           {notification.message}
         </div>
       )}

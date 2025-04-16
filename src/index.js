@@ -8,8 +8,9 @@ import reportWebVitals from './reportWebVitals';
 import Buy from './Buy';
 import Cart from './Cart';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { AllTokens, MintToken, TokenDetail, Transactions} from './pages';
+import { AllTokens, MintToken, TokenDetail, Transactions } from './pages';
 import { EthereumProvider } from './EthereumContext';
+import { CartProvider } from './CartContext'; // Import CartProvider
 import ProductDetail from './components/Product';
 import Checkout from './Checkout';
 import OrderHistory from './OrderHistory';
@@ -52,7 +53,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/Buy",
-    element: <Buy/>
+    element: <Buy />
   },
   {
     path: "/product/:productId",
@@ -63,28 +64,27 @@ const router = createBrowserRouter([
     element: <Cart />
   },
   {
-    path:"/Checkout",
-    element:<Checkout/>
+    path: "/Checkout",
+    element: <Checkout />
   },
   {
-    path:"/Order-History",
-    element:<OrderHistory/>
+    path: "/Order-History",
+    element: <OrderHistory />
   },
   {
-    path:"/Sell",
-    element:<Sell/>
+    path: "/Sell",
+    element: <Sell />
   }
 ]);
 
 root.render(
   <React.StrictMode>
     <EthereumProvider>
-      <RouterProvider router={router} />
+      <CartProvider>
+        <RouterProvider router={router} />
+      </CartProvider>
     </EthereumProvider>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

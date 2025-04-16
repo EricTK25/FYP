@@ -43,24 +43,26 @@ const OrderHistory = () => {
           provider
         );
 
-        // Fetch the number of orders for the user using getOrderCount
         const orderCount = await carrierapp.getOrderCount(account);
         const orderList = [];
 
-        // Fetch each order and its corresponding item details
         for (let i = 1; i <= orderCount; i++) {
           const order = await carrierapp.getOrder(account, i);
           const item = await carrierapp.getProduct(order.item_id);
 
-          // Fetch the transaction hash from GunDB
           let txHash = 'Not available';
-          let orderTime = Number(order.time) * 1000; // Default to blockchain time
+          let orderTime = Number(order.time) * 1000;
           const userOrdersNode = gun.get(`user_${account}`).get('orders');
           await new Promise((resolve) => {
             userOrdersNode.get(i.toString()).once((data) => {
-              if (data) {
+              if (data && data.orderTime) {
                 txHash = data.txHash || 'Not available';
-                orderTime = data.orderTime || orderTime;
+                const parsedTime = new Date(data.orderTime);
+                if (!isNaN(parsedTime.getTime())) {
+                  orderTime = parsedTime.getTime();
+                } else {
+                  console.warn(`Invalid orderTime for order ${i}:`, data.orderTime);
+                }
               }
               resolve();
             });
@@ -117,29 +119,8 @@ const OrderHistory = () => {
           </div>
           {loading ? (
             <div className="loading-state">
-              <p>Loading...</p>
-              <svg
-                className="loading-spinner"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="#facc15"
-                  strokeWidth="4"
-                  opacity="0.25"
-                />
-                <path
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  fill="#facc15"
-                  opacity="0.75"
-                />
-              </svg>
+              <div className="spinner"></div>
+              <p>Loading orders...</p>
             </div>
           ) : error ? (
             <p className="error-message">{error}</p>
@@ -153,16 +134,6 @@ const OrderHistory = () => {
               <div className="order-list">
                 {orders.map((order) => (
                   <div key={order.orderId} className="order-card">
-                    <div className="order-image-container">
-                      <img
-                        src={order.item.image}
-                        alt={order.item.name}
-                        className="order-image"
-                        onError={(e) => {
-                          e.target.src = '/placeholder-image.png'; // Fallback image
-                        }}
-                      />
-                    </div>
                     <div className="order-details">
                       <h3 className="order-title">{order.item.name}</h3>
                       <p className="order-id">Order ID: {order.orderId}</p>
@@ -170,7 +141,10 @@ const OrderHistory = () => {
                         Cost: {ethers.formatEther(order.item.cost)} ETH
                       </p>
                       <p className="order-time">
-                        Ordered At: {new Date(order.orderTime).toLocaleString()}
+                        Ordered At:{' '}
+                        {isNaN(new Date(order.orderTime).getTime())
+                          ? 'Unknown'
+                          : new Date(order.orderTime).toLocaleString()}
                       </p>
                       <p className="order-tx-hash">
                         Transaction Hash:{' '}
@@ -179,8 +153,9 @@ const OrderHistory = () => {
                             href={`https://etherscan.io/tx/${order.txHash}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="tx-hash-link"
                           >
-                            {order.txHash}
+                            {order.txHash.slice(0, 6)}...{order.txHash.slice(-4)}
                           </a>
                         ) : (
                           'Not available'

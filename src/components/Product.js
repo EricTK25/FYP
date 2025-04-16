@@ -1,150 +1,105 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { ethers } from "ethers";
-import CarrierApp from "../abis/CarrierApp.json";
-import config from "../config.json";
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import Gun from "gun";
+import { useEthereum } from "../EthereumContext";
+import { useCart } from "../CartContext";
 import Navigation from "./Navigation";
 import FooterNavigation from "./FooterNavigation";
 import "../App.css";
 
 function ProductDetail() {
+  const { cart, setCart } = useCart();
   const location = useLocation();
-  const navigate = useNavigate();
+  const { account } = useEthereum();
   const { id, name, cost, image, stock, specification, highlights } = location.state || {};
-  const [carrierapp, setCarrierApp] = useState(null);
-  const [provider, setProvider] = useState(null);
-  const [error, setError] = useState(null);
+  const gunRef = useRef(null);
+  const timeoutRef = useRef(null);
   const [notification, setNotification] = useState({ visible: false, message: "" });
-  const [isBuying, setIsBuying] = useState(false);
-  const [itemData, setItemData] = useState(null);
-  const [order, setOrder] = useState(null);
-  const [hasBought, setHasBought] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isSpecOpen, setIsSpecOpen] = useState(true);
+  const [isHighlightOpen, setIsHighlightOpen] = useState(true);
+
+  // Assuming multiple images might be available; use an array if provided, otherwise single image
+  const images = Array.isArray(image) ? image : [image || "/images/placeholder.png"];
 
   useEffect(() => {
-    const loadBlockchainData = async () => {
-      try {
-        if (!window.ethereum) {
-          setError("MetaMask is not installed");
-          return;
-        }
-
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const network = await provider.getNetwork();
-        const chainId = network.chainId.toString();
-
-        if (!config[chainId]?.CarrierApp?.address) {
-          setError(`Contract not deployed on network ${chainId}`);
-          return;
-        }
-
-        const carrierapp = new ethers.Contract(
-          config[chainId].CarrierApp.address,
-          CarrierApp,
-          provider
-        );
-
-        setProvider(provider);
-        setCarrierApp(carrierapp);
-
-        if (id) {
-          try {
-            const item = await carrierapp.getProduct(id);
-            const specs = item.specs;
-            console.log("Fetched item specification:", specs);
-            setItemData({
-              id: item.product_id.toString(),
-              name: item.name,
-              cost: ethers.formatUnits(item.cost.toString(), "ether"),
-              image: item.image,
-              stock: item.stock.toString(),
-              specification: {
-                color: specs.color || "",
-                engine_power: specs.engine_power || "",
-                fuel: specs.fuel || "",
-                interior: specs.interior || "",
-                mileage: specs.mileage || "",
-                condition: specs.condition || "",
-                cubic_capacity: specs.cubic_capacity || "",
-              },
-              highlights: item.highlights,
-            });
-          } catch (err) {
-            console.error("Error fetching item:", err);
-            setError("Failed to load item details from blockchain");
-          }
-        }
-      } catch (err) {
-        console.error("Error loading blockchain data:", err);
-        setError("Failed to connect to blockchain");
-      }
-    };
-
-    loadBlockchainData();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!carrierapp || !window.ethereum.selectedAddress) {
-        console.error("Carrier app or account not defined");
-        return;
-      }
-
-      const account = window.ethereum.selectedAddress;
-      try {
-        const events = await carrierapp.queryFilter("Buy");
-        const orders = events.filter(
-          (event) =>
-            event.args.buyer.toLowerCase() === account.toLowerCase() &&
-            event.args.itemId.toString() === id.toString()
-        );
-
-        if (orders.length === 0) return;
-
-        const order = await carrierapp.orders(account, orders[0].args.orderId);
-        setOrder(order);
-      } catch (err) {
-        console.error("Error fetching order details:", err);
-      }
-    };
-
-    fetchDetails();
-  }, [carrierapp, id, hasBought]);
-
-  const handleBuy = async () => {
-    if (!carrierapp || !provider) {
-      setNotification({ visible: true, message: "Blockchain not initialized" });
-      return;
-    }
-    if (!window.ethereum.selectedAddress) {
-      setNotification({ visible: true, message: "Please connect your wallet" });
-      return;
-    }
-    if ((itemData?.stock || stock) === "0") {
-      setNotification({ visible: true, message: "Item out of stock" });
-      return;
-    }
-
-    setIsBuying(true);
     try {
-      const signer = await provider.getSigner();
-      const contractWithSigner = carrierapp.connect(signer);
-      const tx = await contractWithSigner.buy(id, {
-        value: ethers.parseEther(itemData?.cost || cost),
-      });
-      await tx.wait();
-      setHasBought(true);
-      setNotification({ visible: true, message: `Successfully purchased ${name}!` });
-      setTimeout(() => navigate("/buy"), 3000);
-    } catch (err) {
-      console.error("Purchase error:", err);
-      setNotification({ visible: true, message: "Purchase failed: " + (err.reason || err.message) });
-    } finally {
-      setIsBuying(false);
-      setTimeout(() => setNotification({ visible: false, message: "" }), 3000);
+      gunRef.current = Gun({ peers: [process.env.REACT_APP_GUN_PEER || "http://localhost:8765/gun"] });
+    } catch (error) {
+      console.error("Failed to initialize Gun.js:", error);
+      showNotification("Failed to connect to storage.");
     }
+    return () => {
+      gunRef.current?.off();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const showNotification = (message) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setNotification({ visible: true, message });
+    timeoutRef.current = setTimeout(() => {
+      setNotification({ visible: false, message: "" });
+    }, 3000);
   };
 
-  const displayData = itemData || { id, name, cost, image, stock, specification, highlights };
+  const onAddToCart = async (item) => {
+    if (isAdding || !account) {
+      if (!account) showNotification("Please connect your wallet to add items to the cart.");
+      return;
+    }
+    if (cart.some((cartItem) => cartItem.id === item.id)) {
+      showNotification("Item already in cart!");
+      return;
+    }
+
+    setIsAdding(true);
+    setCart((prevCart) => {
+      const updatedCart = [...prevCart, { id: item.id, name: item.name, cost: item.cost, image: item.image }];
+      const userNode = gunRef.current.get(`user_${account}`);
+      const cartNode = userNode.get("cart");
+
+      updatedCart.forEach((cartItem, index) => {
+        cartNode.get(`item_${index}_${Date.now()}`).put(cartItem);
+      });
+
+      cartNode.put(null, (ack) => {
+        if (ack.err) {
+          console.error(`Error saving cart for account ${account}:`, ack.err);
+          showNotification("Failed to save cart. Please try again.");
+        } else {
+          console.log(`Cart saved for account ${account}`);
+          showNotification(`${item.name} added to cart!`);
+        }
+      });
+
+      return updatedCart;
+    });
+    setIsAdding(false);
+  };
+
+  const displayData = { id, name, cost, image, stock, specification, highlights };
+
+  const specFields = specification
+    ? [
+        { label: "Color", value: specification.color || "Unknown" },
+        { label: "Interior", value: specification.interior || "Unknown" },
+        { label: "Condition", value: specification.condition || "Unknown" },
+        { label: "Fuel", value: specification.fuel || "Unknown" },
+        { label: "Mileage", value: specification.mileage || "Unknown" },
+        { label: "Engine Power", value: specification.engine_power || "Unknown" },
+        { label: "Cubic Capacity", value: specification.cubic_capacity || "Unknown" },
+      ]
+    : [];
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   if (!displayData.id) {
     return (
@@ -161,68 +116,84 @@ function ProductDetail() {
 
   return (
     <div>
-      <div className="product-detail">
-        <Navigation />
-        <div className="product-container">
-          <h2>{displayData.name || "Unnamed Vehicle"}</h2>
-          {error && <p className="error" style={{ color: "red" }}>{error}</p>}
-          <div className="product-image">
+    <Navigation />
+    <div className="product-detail">
+      <div className="product-container">
+        <h2 className="product-title">{displayData.name || "Unnamed Vehicle"}</h2>
+        <div className="carousel">
+          <button className="carousel-arrow left" onClick={prevImage}>
+            &lt;
+          </button>
+          <div className="carousel-image">
             <img
-              src={displayData.image || "/images/placeholder.png"}
+              src={images[currentImageIndex] || "/images/placeholder.png"}
               alt={displayData.name || "Vehicle"}
-              onError={(e) => (e.target.src = "/images/placeholder.png")}
+              onError={(e) => {
+                console.warn(`Failed to load image for ${displayData.name}: ${images[currentImageIndex]}`);
+                e.target.src = "/images/placeholder.png";
+              }}
             />
           </div>
-          <div className="product-info">
-            <p className="cost">Price: {displayData.cost} ETH</p>
-            <p className="stock">Stock: {displayData.stock} available</p>
-            <div className="vehicle-specifications">
-              <h3>Vehicle Specifications</h3>
-              {displayData.specification ? (
-                <ul>
-                  <li>Color: {displayData.specification.color || "Unknown"}</li>
-                  <li>Engine Power: {displayData.specification.engine_power || "Unknown"}</li>
-                  <li>Fuel: {displayData.specification.fuel || "Unknown"}</li>
-                  <li>Interior: {displayData.specification.interior || "Unknown"}</li>
-                  <li>Mileage: {displayData.specification.mileage || "Unknown"}</li>
-                  <li>Condition: {displayData.specification.condition || "Unknown"}</li>
-                  <li>Cubic Capacity: {displayData.specification.cubic_capacity || "Unknown"}</li>
-                </ul>
-              ) : (
-                <p>Specifications not available</p>
-              )}
-            </div>
-            <div className="highlights">
-              <h3>Highlights</h3>
-              {displayData.highlights ? (
-                <p>{displayData.highlights}</p>
-              ) : (
-                <p>No highlights available</p>
-              )}
-            </div>
-            <button
-              className="buy-button"
-              onClick={handleBuy}
-              disabled={isBuying || (displayData.stock === "0")}
-            >
-              {isBuying ? "Processing..." : "Buy Now"}
-            </button>
+          <button className="carousel-arrow right" onClick={nextImage}>
+            &gt;
+          </button>
+        </div>
+        <div className="carousel-dots">
+          {images.map((_, index) => (
+            <span
+              key={index}
+              className={`dot ${index === currentImageIndex ? "active" : ""}`}
+              onClick={() => setCurrentImageIndex(index)}
+            ></span>
+          ))}
+        </div>
+        <div className="product-info">
+          <div className="section vehicle-specifications">
+            <h3 onClick={() => setIsSpecOpen(!isSpecOpen)}>
+              Vehicle Specifications <span className="dropdown-arrow">▼</span>
+            </h3>
+            {isSpecOpen && displayData.specification && (
+              <div className="spec-grid">
+                {specFields.map((spec, index) => (
+                  <div key={index} className="spec-item">
+                    <strong>{spec.label}:</strong> {spec.value}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+          <div className="section highlights">
+            <h3 onClick={() => setIsHighlightOpen(!isHighlightOpen)}>
+              Highlights <span className="dropdown-arrow">▼</span>
+            </h3>
+            {isHighlightOpen && displayData.highlights && (
+              <ul className="highlight-list">
+                {Array.isArray(highlights)
+                  ? highlights.map((highlight, index) => <li key={index}>{highlight}</li>)
+                  : highlights.split("\n").map((highlight, index) => <li key={index}>{highlight.trim()}</li>)
+                }
+              </ul>
+            )}
+          </div>
+          <p className="cost">Price: {displayData.cost} ETH</p>
+          <p className="stock">Stock: {displayData.stock} available</p>
           <button
-            className="buy-button"
-            onClick={handleBuy}
-            disabled={isBuying || displayData.stock === "0"}
+            className="details-add-to-cart"
+            onClick={() => onAddToCart(displayData)}
+            disabled={isAdding || displayData.stock === "0"}
+            aria-label={`Add ${displayData.name || "vehicle"} to cart`}
           >
-            {isBuying ? "Processing..." : "Buy Now"}
+            {isAdding ? "Adding..." : "Add to Cart"}
           </button>
         </div>
       </div>
       {notification.visible && (
-        <div className="notification" role="alert">
+        <div className="notification" role="alert" aria-live="polite">
           {notification.message}
         </div>
       )}
       <FooterNavigation />
+    </div>
     </div>
   );
 }

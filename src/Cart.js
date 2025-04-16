@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useEthereum } from "./EthereumContext";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "./CartContext"; // Import CartContext
 import Navigation from "./components/Navigation";
 import FooterNavigation from "./components/FooterNavigation";
 import CartItem from "./components/CartItem";
@@ -9,11 +10,11 @@ import { initializeGun, loadCartFromGun, updateCartInGun } from "./utils/gun";
 import { initializeBlockchain, fetchFullItems } from "./utils/blockchaincart";
 import "./Cart.css";
 
-const Cart = ({ onRemoveFromCart, onCheckout }) => {
+const Cart = () => {
   const { account } = useEthereum();
+  const { cart, setCart } = useCart(); // Use cart from context
   const navigate = useNavigate();
   const gunRef = useRef(null);
-  const [cart, setCart] = useState([]);
   const [fullCartItems, setFullCartItems] = useState([]);
   const [notification, setNotification] = useState({ visible: false, message: "", type: "success" });
   const [carrierapp, setCarrierApp] = useState(null);
@@ -26,8 +27,10 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
   }, []);
 
   useEffect(() => {
-    loadCartFromGun(account, gunRef.current, setCart);
-  }, [account]);
+    if (account && gunRef.current) {
+      loadCartFromGun(account, gunRef.current, setCart); // Load cart into context
+    }
+  }, [account, setCart]);
 
   useEffect(() => {
     fetchFullItems(cart, carrierapp, setFullCartItems);
@@ -35,11 +38,8 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
 
   const handleRemove = (itemId) => {
     const updatedCart = cart.filter((item) => item.id !== itemId);
-    setCart(updatedCart);
+    setCart(updatedCart); // Update context
     updateCartInGun(account, gunRef.current, updatedCart);
-    if (onRemoveFromCart) {
-      onRemoveFromCart(itemId);
-    }
     setNotification({ visible: true, message: "Item removed from cart!", type: "success" });
     setTimeout(() => setNotification({ visible: false, message: "", type: "success" }), 3000);
   };
@@ -72,9 +72,6 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
       setNotification({ visible: true, message: "Please agree to the terms and refund policy.", type: "error" });
       setTimeout(() => setNotification({ visible: false, message: "", type: "success" }), 3000);
       return;
-    }
-    if (onCheckout) {
-      onCheckout(fullCartItems);
     }
     navigate("/checkout", { state: { cart: fullCartItems } });
   };
@@ -114,7 +111,7 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
           )}
         </div>
         {notification.visible && (
-          <div className={`cart-notification ${notification.type}`} role="alert">
+          <div className={`cart-notification ${notification.type}`} role="alert" aria-live="polite">
             {notification.message}
           </div>
         )}

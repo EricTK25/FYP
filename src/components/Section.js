@@ -2,75 +2,65 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Gun from "gun";
 import { useEthereum } from "../EthereumContext";
+import { useCart } from "../CartContext"; // Import the cart context
 import "../App.css";
 
-const Section = ({ title, items, cart, setCart }) => {
-  const { account, contextcars } = useEthereum();
+const Section = ({ title, items }) => {
+  const { account } = useEthereum();
+  const { cart, setCart } = useCart(); // Use cart context
   const navigate = useNavigate();
   const gunRef = useRef(null);
+  const timeoutRef = useRef(null);
   const [notification, setNotification] = useState({ visible: false, message: "" });
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    if (!gunRef.current) {
-      gunRef.current = Gun({ peers: ["http://localhost:8765/gun"] });
+    try {
+      gunRef.current = Gun({ peers: [process.env.REACT_APP_GUN_PEER || "http://localhost:8765/gun"] });
+    } catch (error) {
+      console.error("Failed to initialize Gun.js:", error);
+      showNotification("Failed to connect to storage.");
     }
-    return () => {
-      if (gunRef.current) {
-        gunRef.current.off();
-      }
-    };
+    return () => gunRef.current?.off();
   }, []);
 
-  const onAddToCart = (item) => {
-    if (!account) {
-      setNotification({
-        visible: true,
-        message: "Please connect your wallet to add items to the cart.",
-      });
-      setTimeout(() => setNotification({ visible: false, message: "" }), 3000);
+  const showNotification = (message) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setNotification({ visible: true, message });
+    timeoutRef.current = setTimeout(() => {
+      setNotification({ visible: false, message: "" });
+    }, 3000);
+  };
+
+  const onAddToCart = async (item) => {
+    if (isAdding || !account) {
+      if (!account) showNotification("Please connect your wallet to add items to the cart.");
       return;
     }
 
+    setIsAdding(true);
     setCart((prevCart) => {
-      // Ensure prevCart is an array
-      const currentCart = Array.isArray(prevCart) ? prevCart : [];
-      console.log('Current cart before update:', currentCart);
-
-      const cartItem = {
-        id: item.id,
-        name: item.name,
-        cost: item.cost,
-        image: item.image,
-      };
-      const updatedCart = [...currentCart, cartItem];
-      console.log('Updated cart:', updatedCart);
-
+      const updatedCart = [...prevCart, { id: item.id, name: item.name, cost: item.cost, image: item.image }];
       const userNode = gunRef.current.get(`user_${account}`);
-      const cartObject = updatedCart.reduce((obj, cartItem, index) => {
-        obj[`item_${index}`] = cartItem;
-        return obj;
-      }, {});
+      const cartNode = userNode.get("cart");
 
-      userNode.get("cart").put(cartObject, (ack) => {
+      updatedCart.forEach((cartItem, index) => {
+        cartNode.get(`item_${index}_${Date.now()}`).put(cartItem);
+      });
+
+      cartNode.put(null, (ack) => {
         if (ack.err) {
           console.error(`Error saving cart for account ${account}:`, ack.err);
-          setNotification({
-            visible: true,
-            message: "Failed to save cart. Please try again.",
-          });
-          setTimeout(() => setNotification({ visible: false, message: "" }), 3000);
+          showNotification("Failed to save cart. Please try again.");
         } else {
-          console.log(`Cart saved for account ${account}:`, cartObject);
-          setNotification({
-            visible: true,
-            message: `${item.name} added to cart!`,
-          });
-          setTimeout(() => setNotification({ visible: false, message: "" }), 3000);
+          console.log(`Cart saved for account ${account}`);
+          showNotification(`${item.name} added to cart!`);
         }
       });
 
       return updatedCart;
     });
+    setIsAdding(false);
   };
 
   const handleCardClick = (item) => {
@@ -83,6 +73,7 @@ const Section = ({ title, items, cart, setCart }) => {
         stock: item.stock,
         specification: item.specification,
         highlights: item.highlights,
+        seller: item.seller,
       },
     });
   };
@@ -94,12 +85,12 @@ const Section = ({ title, items, cart, setCart }) => {
         <p>No vehicles available.</p>
       ) : (
         <div className="cards">
-          {contextcars.map((item) => (
+          {items.map((item) => (
             <div
               className="card"
               key={item.id}
               onClick={() => handleCardClick(item)}
-              role="button"
+              role="link"
               tabIndex={0}
               onKeyDown={(e) => e.key === "Enter" && handleCardClick(item)}
             >
@@ -107,7 +98,10 @@ const Section = ({ title, items, cart, setCart }) => {
                 <img
                   src={item.image || "/images/placeholder.png"}
                   alt={item.name || "Vehicle"}
-                  onError={(e) => (e.target.src = "/images/placeholder.png")}
+                  onError={(e) => {
+                    console.warn(`Failed to load image for ${item.name}: ${item.image}`);
+                    e.target.src = "/images/placeholder.png";
+                  }}
                 />
               </div>
               <div className="card__info">
@@ -119,8 +113,10 @@ const Section = ({ title, items, cart, setCart }) => {
                     e.stopPropagation();
                     onAddToCart(item);
                   }}
+                  disabled={isAdding}
+                  aria-label={`Add ${item.name || "vehicle"} to cart`}
                 >
-                  Add to Cart
+                  {isAdding ? "Adding..." : "Add to Cart"}
                 </button>
               </div>
             </div>
@@ -128,7 +124,7 @@ const Section = ({ title, items, cart, setCart }) => {
         </div>
       )}
       {notification.visible && (
-        <div className="notification" role="alert">
+        <div className="notification" role="alert" aria-live="polite">
           {notification.message}
         </div>
       )}
