@@ -103,7 +103,8 @@ export function MintToken() {
           condition: "New",
           cubic_capacity: "2800 cc",
         },
-        highlights: "Luxury, High Tech"
+        highlights: "Luxury, High Tech",
+ 
       };
       setProductCount(productCount + 1);
       const gun = Gun({ peers: ['http://localhost:8765/gun'] });
@@ -134,7 +135,8 @@ export function MintToken() {
           condition: item.specification.condition,
           cubic_capacity: item.specification.cubic_capacity,
         },
-        highlights: item.highlights
+        highlights: item.highlights,
+        
       });
       setContextcars(cars);
     }

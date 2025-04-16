@@ -8,8 +8,9 @@ import CheckoutInfo from "./components/CheckOutInfo";
 import { loadBlockchainData, buyHandler } from "./utils/blockchain";
 import { generateAndStoreDocument } from "./utils/document";
 import { clearCart } from "./utils/cart";
+import Gun from 'gun';
 import "./Checkout.css";
-
+const gun = Gun();
 const Checkout = () => {
   const { account } = useEthereum();
   const location = useLocation();
@@ -22,7 +23,19 @@ const Checkout = () => {
   const [notification, setNotification] = useState({ visible: false, message: "" });
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [documentCids, setDocumentCids] = useState([]);
+  const [shippingAddress, setShippingAddress] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (account) {
+      const userNode = gun.get(`user_${account}`).get('profile');
+      userNode.once((data) => {
+        if (data) {
+          setShippingAddress(data.shippingAddress);
+        }
+      });
+    }
+  }, [account]);
 
   useEffect(() => {
     loadBlockchainData({ setProvider, setCarrierApp, setDocumentRegistry, setNotification });
@@ -138,6 +151,7 @@ const Checkout = () => {
           transactionHash={transactionHash}
           documentCids={documentCids}
           hasBought={hasBought}
+          shippingAddress={shippingAddress}
         />
       )}
       {notification.visible && (
