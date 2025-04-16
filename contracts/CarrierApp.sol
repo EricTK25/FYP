@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
@@ -143,5 +144,9 @@ contract CarrierApp {
     function getOrder(address _user, uint256 _orderId) external view returns (Order memory) {
         if (_orderId == 0 || _orderId > orderCount[_user]) revert ItemNotFound(_orderId);
         return orders[_user][_orderId];
+    }
+
+    function getOrderCount(address _user) external view returns (uint256) {
+        return orderCount[_user];
     }
 }
