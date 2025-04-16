@@ -5,7 +5,7 @@ import FooterNavigation from "./components/FooterNavigation";
 import Navigation from './components/Navigation';
 import "./page.css";
 const Gun = require('gun');
-const insertData = require('./config/insertData.js');
+const insertData = require('../src/Config/insertData.js');
 
 
 export function AllTokens() {
@@ -18,62 +18,72 @@ export function AllTokens() {
         </div>
     );
 }
-
 export function MintToken() {
-    const { account, contextcars, setContextcars } = useEthereum();
+    const {account, contract, productCount, setProductCount, contextcars, setContextcars} = useEthereum();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
-    const [provider, setProvider] = useState(null);
-    const [carrierApp, setCarrierApp] = useState(null);
-
+    
     const [formData, setFormData] = useState({
-        carrierName: '',
-        carrierType: 'car',
-        registrationNumber: '',
-        price: 0,
-        year: new Date().getFullYear()
+      carrierName: '',
+      carrierType: 'car',
+      registrationNumber: '',
+      price: 0,
+      year: new Date().getFullYear()
     });
-
-    useEffect(() => {
-        const initBlockchain = async () => {
-            try {
-                if (!window.ethereum) {
-                    setError("MetaMask is not installed");
-                    return;
-                }
-
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const network = await provider.getNetwork();
-                const chainId = network.chainId.toString();
-
-                if (!config[chainId]?.CarrierApp?.address) {
-                    setError(`Contract not deployed on network ${chainId}`);
-                    return;
-                }
-
-                const carrierApp = new ethers.Contract(
-                    config[chainId].CarrierApp.address,
-                    CarrierApp,
-                    provider
-                );
-
-                setProvider(provider);
-                setCarrierApp(carrierApp);
-            } catch (err) {
-                console.error("Error initializing blockchain:", err);
-                setError("Failed to connect to blockchain");
-            }
-        };
-
-        initBlockchain();
-    }, []);
-
+  
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: name === 'price' || name === 'year' ? Number(value) : value
-        }));
+      const { name, value } = e.target;
+      setFormData(prev => ({
+        ...prev,
+        [name]: name === 'price' || name === 'year' ? Number(value) : value
+      }));
+    };
+  
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setError('');
+  
+      // Check account connection
+      if (!account) {
+        alert('Please connect your wallet first using the "Create Wallet" button!');
+        return;
+      }
+  
+      try {
+        setIsSubmitting(true);
+
+        // Construct Carrier struct
+        const carrierData = {
+          owner: account,
+          carrierName: formData.carrierName,
+          carrierType: formData.carrierType,
+          registrationNumber: formData.registrationNumber,
+          price: ethers.parseEther(formData.price.toString()),
+          year: formData.year,
+          txSucCount: 0
+        };
+  
+        // Send transaction
+        const tx = await contract.mintToken(carrierData);
+        await tx.wait();
+        
+        // Reset form
+        setFormData({
+          carrierName: '',
+          registrationNumber: '',
+          price: 0,
+          year: new Date().getFullYear()
+        });
+        
+        alert('Carrier Token created successfully!');
+
+        CreateCarrierToBuyList();
+      } catch (err) {
+        console.error('Contract call failed:', err);
+        setError(err.message || 'Failed to create carrier');
+      } finally {
+        setIsSubmitting(false);
+      }
     };
 
     const CreateCarrierToBuyList = async () => {
@@ -216,12 +226,10 @@ export function MintToken() {
 </div>
       </div>
     );
-}
-
+};
 export function TokenDetail() {
     return (<h1>TokenDetail</h1>);
 }
-
 export function Transactions() {
     return (<h1>Transactions</h1>);
 }
