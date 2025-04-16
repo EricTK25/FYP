@@ -5,7 +5,7 @@ import { useEthereum } from './EthereumContext';
 import FooterNavigation from "./components/FooterNavigation";
 import Navigation from './components/Navigation';
 import Gun from 'gun';
-
+import axios from 'axios';
 const gun = Gun();
 
 const ProfileP = () => {
@@ -25,6 +25,7 @@ const ProfileP = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
+
   useEffect(() => {
     if (account) {
       setLoading(true);
@@ -42,8 +43,18 @@ const ProfileP = () => {
 
   const handleSaveProfile = () => {
     const userNode = gun.get(`user_${account}`).get('profile');
-    userNode.put(profile);
-    setShowEdit(false);
+    userNode.put({
+      name: profile.name,
+      email: profile.email,
+      phoneNumber: profile.phoneNumber,
+    }, (ack) => {
+      if (ack.err) {
+        alert("Error uploading information!");
+      } else {
+        alert("Information uploaded successfully!");
+        setShowEdit(false);
+      }
+    });
   };
 
   const handleIconUpload = (e) => {
@@ -64,7 +75,7 @@ const ProfileP = () => {
     e.preventDefault();
     const userNode = gun.get(`user_${account}`).get('profile');
     userNode.put(profile);
-    setIsPrompted(true);
+          setIsPrompted(true);
     setShowModal(false);
   };
 
@@ -73,9 +84,65 @@ const ProfileP = () => {
     navigate('/');
   };
 
-  const toggleEdit = () => setShowEdit(!showEdit);
-  const toggleIconUpload = () => setShowIconUpload(!showIconUpload);
-  const toggleAddressForm = () => setShowAddressForm(!showAddressForm);
+  const toggleEdit = () => {
+    setShowEdit((prevShowEdit) => {
+      const newShowEdit = !prevShowEdit;
+      const editArrow = document.querySelector('.edit-arrow');
+      if (newShowEdit) {
+        editArrow.textContent = ' v ';
+      } else {
+        editArrow.textContent = ' > ';
+      }
+      return newShowEdit;
+    });
+  };
+  const toggleIconUpload = () => {
+    setShowIconUpload((prevShowIconUpload) => {
+      const newShowIconUpload = !prevShowIconUpload;
+      const iconArrow = document.querySelector('.icon-arrow');
+      if (newShowIconUpload) {
+        iconArrow.textContent = ' v ';
+      } else {
+        iconArrow.textContent = ' > ';
+      }
+      return newShowIconUpload;
+    });
+  };
+
+  const handleSaveAddress = () => {
+    const userNode = gun.get(`user_${account}`).get('profile');
+  
+    userNode.once((data) => {
+      if (!data) {
+        console.error("Profile not found");
+        return;
+      }
+
+      userNode.put({ shippingAddress: profile.shippingAddress }, (ack) => {
+        if (ack.err) {
+          console.error("Error updating shipping address:", ack.err);
+        } else {
+          console.log("Shipping address updated successfully");
+          setShowAddressForm(false);
+        }
+      });
+    });
+  };
+  
+  const toggleAddressForm = () => {
+    setShowAddressForm((prevShowAddress) => {
+      const newShowAddress = !prevShowAddress;
+      const AddressArrow = document.querySelector('.ship-arrow');
+      if (newShowAddress) {
+        AddressArrow.textContent = ' v ';
+      } else {
+        AddressArrow.textContent = ' > ';
+      }
+      return newShowAddress;
+    });
+  };
+  //const toggleIconUpload = () => setShowIconUpload(!showIconUpload);
+  //const toggleAddressForm = () => setShowAddressForm(!showAddressForm);
 
   return (
     <div className="profile-page">
@@ -92,8 +159,17 @@ const ProfileP = () => {
         </div>
       </div>
 
-      {/* Orders Section */}
-      <section className="orders-section">
+      <div className="profile-detail">
+        <h2>Profile</h2>
+        {profile.name ? (
+          <div>
+            <h3>{profile.name}</h3>
+            <p>Email: {profile.email}</p>
+            <p>Phone: {profile.phoneNumber}</p>
+            <p>Shipping Address: {profile.shippingAddress || "Have not entered shipping address yet"}</p>
+
+  {/* Orders Section */}
+  <section className="orders-section">
         <h2 className="title">My Orders</h2>
         <div className="underline"></div>
         <div className="orders">
@@ -111,19 +187,12 @@ const ProfileP = () => {
           </div>
         </div>
       </section>
-      <div className="profile-detail">
-        <h2>Profile</h2>
-        {profile.name ? (
-          <div>
-            <h3>{profile.name}</h3>
-            <p>Email: {profile.email}</p>
-            <p>Phone: {profile.phoneNumber}</p>
-            <p>Shipping Address: {profile.shippingAddress || "Have not entered shipping address yet"}</p>
             <section className="options-section">
               <div className="option" onClick={toggleEdit}>
                 <span>Edit Profile</span>
                 <span className="arrow edit-arrow"> > </span>
               </div>
+              </section>
               {showEdit && (
                 <div className="edit-form">
                   <form>
@@ -153,19 +222,28 @@ const ProfileP = () => {
                   </form>
                 </div>
               )}
+               <section className="options-section">
               <div className="option" onClick={toggleIconUpload}>
                 <span>Edit Icon</span>
                 <span className="arrow icon-arrow"> > </span>
               </div>
+              </section>
               {showIconUpload && (
+                <div className="icon-upload">
+                  <br />
                 <input type="file" accept="image/*" onChange={handleIconUpload} />
+                <br />
+                </div>
               )}
+              <section className="options-section">
               <div className="option" onClick={toggleAddressForm}>
                 <span>Shipping Address</span>
                 <span className="arrow ship-arrow"> > </span>
               </div>
+              </section>
               {showAddressForm && (
                 <div className="address-form">
+                  <br />
                   <label>Shipping Address:</label>
                   <input
                     type="text"
@@ -173,24 +251,23 @@ const ProfileP = () => {
                     onChange={(e) => setProfile({ ...profile, shippingAddress: e.target.value })}
                     required
                   />
-                  <button type="button" onClick={handleSaveProfile}>Save Address</button>
+                  <button type="button" onClick={handleSaveAddress}>Save Address</button>
                   <button type="button" onClick={toggleAddressForm}>Cancel</button>
+                  <br />
                 </div>
               )}
-              <Link to="/selling-management" className="option">
-                <span>Selling Management</span>
-                <span className="arrow"> > </span>
-              </Link>
               {/* New Order History Button */}
+         <section className="options-section">
               <Link to="/order-history" className="option">
                 <span>Order History</span>
                 <span className="arrow"> > </span>
               </Link>
+</section>
+              <section className="options-section">
               <div className="option" onClick={handleLogout}>
                 <span>Logout</span>
-                <span className="arrow"> > </span>
               </div>
-            </section>
+              </section>
           </div>
         ) : (
           <h3>You haven't connected to the MetaMask wallet or entered your personal information!</h3>
