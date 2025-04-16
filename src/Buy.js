@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useEthereum } from "./EthereumContext"; // Import EthereumContext globally
-
-// ABIs
+import Gun from "gun";
+import { useEthereum } from "./EthereumContext";
 import CarrierApp from "./abis/CarrierApp.json";
-
-// Components
 import Navigation from "./components/Navigation";
 import Section from "./components/Section";
 import FooterNavigation from "./components/FooterNavigation";
 import HeroSection from "./components/HeroSection";
-
-// Config
 import config from "./config.json";
 
 const Buy = () => {
@@ -21,6 +16,30 @@ const Buy = () => {
   const [cars, setCars] = useState([]);
   const [cart, setCart] = useState([]);
   const [error, setError] = useState(null);
+
+  const gunRef = useRef(null);
+  if (!gunRef.current) {
+    gunRef.current = Gun();
+  }
+  const gun = gunRef.current;
+
+  useEffect(() => {
+    if (account) {
+      const userNode = gun.get(`user_${account}`);
+      userNode.get("cart").once((cartData) => {
+        if (cartData) {
+          const cartArray = Object.keys(cartData)
+            .filter((key) => key.startsWith("item_"))
+            .map((key) => cartData[key]);
+          setCart(cartArray);
+          console.log(`Loaded cart for account ${account}:`, cartArray);
+        } else {
+          console.log(`No cart data found for account ${account}. Initializing an empty cart.`);
+          setCart([]);
+        }
+      });
+    }
+  }, [account, gun]);
 
   const loadBlockchainData = async () => {
     try {
@@ -73,17 +92,12 @@ const Buy = () => {
           });
           id++;
         } catch (innerError) {
-          if (innerError.code === 'CALL_EXCEPTION' && !innerError.data) {
-            console.log(`Item ${id} not found in contract.`);
-            break; // Stop when no more items exist
-          } else if (innerError.errorName === 'ItemNotFound') {
-            console.log(`Item ${id} does not exist.`);
-            break; // Stop when no more items exist
-          } else {
-            console.error(`Error fetching item ${id}:`, innerError);
-            id++;
-            if (id > 100) break; // Safety limit to prevent infinite loops
+          if (innerError.reason?.includes("ItemNotFound")) {
+            break;
           }
+          console.error(`Error fetching item ${id}:`, innerError);
+          id++;
+          if (id > 100) break;
         }
       }
   
@@ -101,7 +115,6 @@ const Buy = () => {
     }
   };
 
-  // Load blockchain data on component mount
   useEffect(() => {
     loadBlockchainData();
   }, []);
@@ -114,12 +127,7 @@ const Buy = () => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <Section
-          title={"Cars"}
-          items={cars}
-          cart={cart}
-          setCart={setCart}
-        />
+        <Section title={"Cars"} items={cars} cart={cart} setCart={setCart} />
       )}
       <FooterNavigation />
     </div>
