@@ -24,24 +24,6 @@ const Buy = () => {
   }
   const gun = gunRef.current;
 
-  useEffect(() => {
-    if (account) {
-      const userNode = gun.get(`user_${account}`);
-      userNode.get("cart").once((cartData) => {
-        if (cartData) {
-          const cartArray = Object.keys(cartData)
-            .filter((key) => key.startsWith("item_"))
-            .map((key) => cartData[key]);
-          setCart(cartArray);
-          console.log(`Loaded cart for account ${account}:`, cartArray);
-        } else {
-          console.log(`No cart data found for account ${account}. Initializing an empty cart.`);
-          setCart([]);
-        }
-      });
-    }
-  }, [account, gun]);
-
   const loadBlockchainData = async () => {
     try {
       if (!window.ethereum) {
@@ -50,7 +32,7 @@ const Buy = () => {
       }
   
       const provider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(provider);
+      //setProvider(provider);
       const network = await provider.getNetwork();
       const chainId = network.chainId.toString();
   
@@ -102,19 +84,35 @@ const Buy = () => {
         }
       }
   
-      if (items.length === 0) {
-        setError("No items found in the contract");
-      } else {
-        setCars(items);
-        setContextcars(items); // Sync with global context
+      setCars(items);
+      if(contextcars===null){
+        setContextcars(items);
       }
     } catch (error) {
       console.error("Error loading blockchain data:", error);
-      setError("Failed to load data from blockchain");
+      //setError("Failed to load data from blockchain");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (account) {
+      const userNode = gun.get(`user_${account}`);
+      userNode.get("cart").once((cartData) => {
+        if (cartData) {
+          const cartArray = Object.keys(cartData)
+            .filter((key) => key.startsWith("item_"))
+            .map((key) => cartData[key]);
+          setCart(cartArray);
+          console.log(`Loaded cart for account ${account}:`, cartArray);
+        } else {
+          console.log(`No cart data found for account ${account}. Initializing an empty cart.`);
+          setCart([]);
+        }
+      });
+    }
+  }, [account, gun]);
 
   useEffect(() => {
     loadBlockchainData();

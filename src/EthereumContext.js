@@ -14,7 +14,7 @@ export function EthereumProvider({ children }) {
   const [allTokens, setAllTokens] = useState([]);
   const [cart, setCart] = useState([]); // Store cart items for the user
   const [productCount, setProductCount] = useState(1);
-  const [Contextcars, setContextcars] = useState(null);
+  const [contextcars, setContextcars] = useState(null);
 
   const gun = Gun({ peers: "[invalid url, do not cite] "}); 
 
@@ -108,7 +108,7 @@ export function EthereumProvider({ children }) {
         allTokens,
         cart,
         productCount,
-        Contextcars,
+        contextcars,
         disconnectWallet,
         connectWallet,
         loadTokens,
