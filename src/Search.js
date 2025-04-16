@@ -151,9 +151,33 @@ const Search = () => {
               <div className="featured-brands">
                 <h3>Featured Brands</h3>
                 <div className="brands-container">
-                  <img src="/images/toyota.png" alt="Toyota" className="brand-logo" />
-                  <img src="/images/honda.png" alt="Honda" className="brand-logo" />
-                  <img src="/images/tesla.png" alt="Tesla" className="brand-logo" />
+                <img src="toyota.png" alt="Toyota" className="brand-logo" />
+               <img src="honda.png" alt="Honda" className="brand-logo" />
+               <img src="tesla.png" alt="Tesla" className="brand-logo" />
+               <img src="Audi.png" alt="Audi" className="brand-logo" />
+               <img src="BMW.webp" alt="BMW" className="brand-logo" />
+               <img src="DaeWoo.png" alt="DaeWoo" className="brand-logo" />
+               <img src="Ford.jpeg" alt="Ford" className="brand-logo" />
+               <img src="Holden.png" alt="Holden" className="brand-logo" />
+               <img src="jaguar.jpg" alt="jaguar" className="brand-logo" />
+                </div>
+              </div>
+              <div className="watercrafts-ships">
+                <h3>WaterCrafts / Ships</h3>
+                <div className="brands-container">
+                <img src="Kawasaki.png" alt="Kawasaki" className="brand-logo" />
+               <img src="yamaha.jpg" alt="yamaha" className="brand-logo" />
+               <img src="cosco.png" alt="cosco" className="brand-logo" />
+   
+                </div>
+              </div>
+              <div className="planes">
+                <h3>Planes</h3>
+                <div className="brands-container">
+                <img src="cirrus.png" alt="cirrus" className="brand-logo" />
+               <img src="Bombardier.png" alt="Bombardier" className="brand-logo" />
+               <img src="Embraer.png" alt="Embraer" className="brand-logo" />
+      
                 </div>
               </div>
 

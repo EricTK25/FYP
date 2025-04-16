@@ -40,15 +40,40 @@ body {
 .hero {
   position: relative;
   width: 100%;
-  height: 100%;
+  margin: auto;
   overflow: hidden;
+}
+
+.hero-images {
+  display: flex;
+  transition: transform 0.5s ease;
 }
 
 .hero-image {
   width: 100%;
-  height: 100%;
-  object-fit: cover; 
+  height: 500px;
+  object-fit: contain; 
   transition: opacity 0.5s ease-in-out; 
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.dot {
+  height: 10px;
+  width: 10px;
+  margin: 0 5px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: #717171;
 }
 
 /* Car List */
@@ -130,7 +155,7 @@ body {
 
 .card__image {
   width: 100%; /* Full width */
-  height: 150px; /* Fixed height for image */
+  height: 175px; /* Fixed height for image */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -147,7 +172,7 @@ body {
 }
 
 .card__info p {
-  font-size: 1.2em;
+  font-size: 1em;
   margin: 10px 0;
 }
 
@@ -181,6 +206,9 @@ body {
 
 .product-image img {
   max-width: 100%;
+  height: 500px;
+  overflow: hidden;
+  object-fit: contain;
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -275,4 +303,34 @@ body {
   .product__image {
     grid-column: span 2;
   }
+}
+
+.featured-brands {
+  margin-top: 30px;
+}
+
+.featured-brands h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.brands-container {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 10px;
+}
+
+.brands-container .brand-logo {
+  height: 100px;
+  width: 50%; 
+  margin-right: 10px; 
+}
+
+.brands-container .brand-logo:last-child {
+  margin-right: 0; 
+}
+
+.App{
+    padding-bottom: 100px; /* 調整數值以適應導航欄高度 */
 }
