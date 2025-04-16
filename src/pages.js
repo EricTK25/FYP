@@ -5,12 +5,8 @@ import FooterNavigation from "./components/FooterNavigation";
 import Navigation from './components/Navigation';
 import "./page.css";
 const Gun = require('gun');
-<<<<<<< Updated upstream
 const insertData = require('../src/Config/insertData.js');
 
-=======
-const insertData = require('./Config/insertData.js');
->>>>>>> Stashed changes
 
 export function AllTokens() {
     const { allTokens, loadTokens } = useEthereum();
