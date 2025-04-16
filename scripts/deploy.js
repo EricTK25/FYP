@@ -61,8 +61,11 @@ async function main() {
     );
   }
 
+<<<<<<< Updated upstream
   let carrierapp;
 
+=======
+>>>>>>> Stashed changes
   try {
     await insertIntoGun();
     console.log("Data insertion to Gun.js complete!");
