@@ -116,6 +116,15 @@ html, body {
     padding: 10px 20px;
   }
   
+  .brand-logo {
+    width: 100px;
+    height: auto;
+    object-fit: contain;
+    padding: 10px 20px;
+  }
+  
+  
+  
   /* Categories */
   .categories {
     padding: 15px;

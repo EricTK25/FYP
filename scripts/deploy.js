@@ -61,6 +61,8 @@ async function main() {
     );
   }
 
+  let carrierapp;
+
   try {
     await insertIntoGun();
     console.log("Data insertion to Gun.js complete!");

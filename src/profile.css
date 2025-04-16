@@ -115,7 +115,8 @@ body {
 
 /* Options Section */
 .options-section {
-  padding: 10px; /* Reduced padding */
+  padding-top: 10px; /* Reduced padding */
+  padding-left: 10px; /* Reduced padding */
     background-color: #f4c20d;
 }
 
@@ -228,8 +229,4 @@ body {
   
 .edit-form{
   padding: 10px;
-}
-
-.profile-page {
-  padding-bottom: 200px;
 }

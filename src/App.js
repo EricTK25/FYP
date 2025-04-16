@@ -88,11 +88,14 @@ function App() {
         {loading ? (
           <p>Loading cars...</p>
         ) : (
-          <Section
-          items={dailyHighlights}
-          cart={cart}
-          setCart={setCart}
-        />
+          cars.map((car) => (
+            <div key={car.tokenId} className="car-card">
+              <img src={car.image} alt={car.name} className="car-image" />
+              <h4>{car.name}</h4>
+              <p>{car.price} ETH</p>
+              <button className="add-to-cart">purchase</button>
+            </div>
+          ))
         )}
       </div>
 
