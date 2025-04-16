@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 contract CarrierApp {
-    address public immutable owner; // Immutable to save gas
+    address public immutable owner;
 
     struct Specification {
         string color;
@@ -16,23 +16,23 @@ contract CarrierApp {
 
     struct Item {
         uint256 product_id;
-        string name; // Shortened variable name
+        string name;
         string category;
-        string image; // Consider IPFS hash for efficiency
+        string image;
         uint256 cost;
-        uint32 stock; // Reduced size for stock
-        Specification specs; // Shortened name
+        uint32 stock;
+        Specification specs;
         string highlights;
     }
 
     struct Order {
         uint256 time;
-        uint256 item_id; // Store only item_id to save space
+        uint256 item_id;
     }
 
-    mapping(uint256 => Item) private items; // Private for encapsulation
-    mapping(address => uint256) private orderCount; // Private for encapsulation
-    mapping(address => mapping(uint256 => Order)) private orders; // Private for encapsulation
+    mapping(uint256 => Item) private items;
+    mapping(address => uint256) private orderCount;
+    mapping(address => mapping(uint256 => Order)) private orders;
 
     event Buy(address indexed buyer, uint256 orderId, uint256 itemId);
     event List(uint256 indexed id, string name, uint256 cost, uint32 stock);
@@ -53,42 +53,29 @@ contract CarrierApp {
         _;
     }
 
+    // Refactored list function to use structs for parameters
     function list(
         uint256 _id,
-        string calldata _name, // calldata for gas savings
-        string calldata _category,
-        string calldata _image,
-        uint256 _cost,
-        uint32 _stock,
-        string calldata _color,
-        string calldata _engine_power,
-        string calldata _fuel,
-        string calldata _interior,
-        string calldata _mileage,
-        string calldata _condition,
-        string calldata _cubic_capacity,
-        string calldata _highlights
+        Item calldata _item,
+        Specification calldata _specs
     ) external onlyOwner {
-        if (_id == 0 || items[_id].product_id != 0) revert ItemNotFound(_id); // Prevent overwriting
+        if (_id == 0 || items[_id].product_id != 0) revert ItemNotFound(_id);
+
         items[_id] = Item({
             product_id: _id,
-            name: _name,
-            category: _category,
-            image: _image,
-            cost: _cost,
-            stock: _stock,
-            specs: Specification(_color, _engine_power, _fuel, _interior, _mileage, _condition, _cubic_capacity),
-            highlights: _highlights
+            name: _item.name,
+            category: _item.category,
+            image: _item.image,
+            cost: _item.cost,
+            stock: _item.stock,
+            specs: _specs,
+            highlights: _item.highlights
         });
 
-        emit List(_id, _name, _cost, _stock);
+        emit List(_id, _item.name, _item.cost, _item.stock);
     }
 
-    function update(
-        uint256 _id,
-        uint256 _cost,
-        uint32 _stock
-    ) external onlyOwner {
+    function update(uint256 _id, uint256 _cost, uint32 _stock) external onlyOwner {
         if (items[_id].product_id == 0) revert ItemNotFound(_id);
         Item storage item = items[_id];
         item.cost = _cost;
@@ -104,7 +91,7 @@ contract CarrierApp {
         if (msg.value < item.cost) revert InsufficientPayment(msg.value, item.cost);
 
         unchecked {
-            item.stock--; // Unchecked for gas savings (uint32 won't underflow here)
+            item.stock--;
             orderCount[msg.sender]++;
         }
 
@@ -130,7 +117,7 @@ contract CarrierApp {
     }
 
     function getItemDetails(uint256 _id) external view returns (
-        uint256 id,
+        uint256 product_id,
         string memory name,
         string memory category,
         string memory image,

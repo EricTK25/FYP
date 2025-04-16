@@ -1,0 +1,12 @@
+.checkout-info h3 {
+    margin-top: 20px;
+  }
+  
+  .checkout-info p a {
+    color: #1e90ff;
+    text-decoration: none;
+  }
+  
+  .checkout-info p a:hover {
+    text-decoration: underline;
+  }

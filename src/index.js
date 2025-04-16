@@ -12,6 +12,7 @@ import { AllTokens, MintToken, TokenDetail, Transactions} from './pages';
 import { EthereumProvider } from './EthereumContext';
 import ProductDetail from './components/Product';
 import Checkout from './Checkout';
+import OrderHistory from './OrderHistory';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
   {
     path:"/Checkout",
     element:<Checkout/>
+  },
+  {
+    path:"/Order-History",
+    element:<OrderHistory/>
   }
 ]);
 

@@ -129,75 +129,54 @@ function ProductDetail() {
     );
   }
 
-  const fetchDetails = async () => {
-    if (!carrierapp) {
-      console.error("Carrier app instance is not defined");
-      return;
-    }
-
-    const events = await carrierapp.queryFilter("Buy");
-    const orders = events.filter(
-      (event) => event.args.buyer === account && event.args.itemId.toString() === id.toString()
-    );
-
-    if (orders.length === 0) return;
-
-    const order = await carrierapp.orders(account, orders[0].args.orderId);
-    setOrder(order);
-  };
-
-  const buyHandler = async () => {
-    const signer = await provider.getSigner();
-
-    let transaction = await carrierapp.connect(signer).buy(id, { value: cost });
-    await transaction.wait();
-
-    setHasBought(true);
-  };
-
-  useEffect(() => {
-    fetchDetails();
-  }, [hasBought]);
-
   return (
-    <div className="product-detail">
-      <Navigation />
-      <div className="product-container">
-        <h2>{displayData.name || "Unnamed Vehicle"}</h2>
-        {error && <p className="error" style={{ color: "red" }}>{error}</p>}
-        <div className="product-image">
-          <img
-            src={displayData.image || "/images/placeholder.png"}
-            alt={displayData.name || "Vehicle"}
-            onError={(e) => (e.target.src = "/images/placeholder.png")}
-          />
-        </div>
-        <div className="product-info">
-          <p className="cost">Price: {displayData.cost} ETH</p>
-          <p className="stock">Stock: {displayData.stock} available</p>
-          <div className="vehicle-specifications">
-            <h3>Vehicle Specifications</h3>
-            {displayData.specification ? (
-              <ul>
-                <li>Color: {displayData.specification.color || "Unknown"}</li>
-                <li>Engine Power: {displayData.specification.engine_power || "Unknown"}</li>
-                <li>Fuel: {displayData.specification.fuel || "Unknown"}</li>
-                <li>Interior: {displayData.specification.interior || "Unknown"}</li>
-                <li>Mileage: {displayData.specification.mileage || "Unknown"}</li>
-                <li>Condition: {displayData.specification.condition || "Unknown"}</li>
-                <li>Cubic Capacity: {displayData.specification.cubic_capacity || "Unknown"}</li>
-              </ul>
-            ) : (
-              <p>Specifications not available</p>
-            )}
+    <div>
+      <div className="product-detail">
+        <Navigation />
+        <div className="product-container">
+          <h2>{displayData.name || "Unnamed Vehicle"}</h2>
+          {error && <p className="error" style={{ color: "red" }}>{error}</p>}
+          <div className="product-image">
+            <img
+              src={displayData.image || "/images/placeholder.png"}
+              alt={displayData.name || "Vehicle"}
+              onError={(e) => (e.target.src = "/images/placeholder.png")}
+            />
           </div>
-          <div className="highlights">
-            <h3>Highlights</h3>
-            {displayData.highlights ? (
-              <p>{displayData.highlights}</p>
-            ) : (
-              <p>No highlights available</p>
-            )}
+          <div className="product-info">
+            <p className="cost">Price: {displayData.cost} ETH</p>
+            <p className="stock">Stock: {displayData.stock} available</p>
+            <div className="vehicle-specifications">
+              <h3>Vehicle Specifications</h3>
+              {displayData.specification ? (
+                <ul>
+                  <li>Color: {displayData.specification.color || "Unknown"}</li>
+                  <li>Engine Power: {displayData.specification.engine_power || "Unknown"}</li>
+                  <li>Fuel: {displayData.specification.fuel || "Unknown"}</li>
+                  <li>Interior: {displayData.specification.interior || "Unknown"}</li>
+                  <li>Mileage: {displayData.specification.mileage || "Unknown"}</li>
+                  <li>Condition: {displayData.specification.condition || "Unknown"}</li>
+                  <li>Cubic Capacity: {displayData.specification.cubic_capacity || "Unknown"}</li>
+                </ul>
+              ) : (
+                <p>Specifications not available</p>
+              )}
+            </div>
+            <div className="highlights">
+              <h3>Highlights</h3>
+              {displayData.highlights ? (
+                <p>{displayData.highlights}</p>
+              ) : (
+                <p>No highlights available</p>
+              )}
+            </div>
+            <button
+              className="buy-button"
+              onClick={handleBuy}
+              disabled={isBuying || (displayData.stock === "0")}
+            >
+              {isBuying ? "Processing..." : "Buy Now"}
+            </button>
           </div>
           <button
             className="buy-button"
@@ -207,7 +186,11 @@ function ProductDetail() {
             {isBuying ? "Processing..." : "Buy Now"}
           </button>
         </div>
-        <button className="buy-button" onClick={buyHandler}>Purchase Now</button>
+        {notification.visible && (
+          <div className="notification" role="alert">
+            {notification.message}
+          </div>
+        )}
       </div>
       {notification.visible && (
         <div className="notification" role="alert">

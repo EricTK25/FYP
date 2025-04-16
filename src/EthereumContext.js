@@ -14,11 +14,11 @@ export function EthereumProvider({ children }) {
   const [allTokens, setAllTokens] = useState([]);
   const [cart, setCart] = useState([]); // Store cart items for the user
   const [productCount, setProductCount] = useState(1);
-  const [contextcars, setContextcars] = useState(null);
+  const [Contextcars, setContextcars] = useState(null);
 
-  const gun = Gun(); // Initialize GunDB instance
+  const gun = Gun({ peers: "[invalid url, do not cite] "}); 
 
-  // Function to connect MetaMask wallet and save the account in GunDB
+  // Function to connect MetaMask wallet and load cart from GunDB
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("MetaMask is not installed!");
@@ -40,32 +40,24 @@ export function EthereumProvider({ children }) {
       setContract(contract);
       setAccount(accounts[0]);
 
-      // Save the account in GunDB
-      const userNode = gun.get(`user_${accounts[0]}`);
-      userNode.put({ address: accounts[0] }, () => {
-        console.log(`Wallet address ${accounts[0]} saved in GunDB.`);
-      });
-
       // Load cart data for this account from GunDB
-      userNode.once((data) => {
-        if (data && data.cart) {
-          setCart(data.cart);
-          console.log(`Loaded cart for account ${accounts[0]}:`, data.cart);
-        } else {
-          console.log(`No cart found for account ${accounts[0]}.`);
-        }
+      const userNode = gun.get(`user_${accounts[0]}`);
+      userNode.get('cart').once((cartData) => {
+        setCart(cartData || []);
+        console.log(`Loaded cart for account ${accounts[0]}:`, cartData || []);
       });
     } catch (error) {
       console.error("Error connecting wallet:", error);
     }
   };
 
-  
+  // Function to disconnect wallet and clear cart
   const disconnectWallet = () => {
-    setAccount(null); 
-
+    setAccount(null);
+    setCart([]); // Clear cart when disconnecting
   };
 
+  // Function to load tokens from the contract
   const loadTokens = async () => {
     try {
       if (!contract) return;
@@ -102,7 +94,7 @@ export function EthereumProvider({ children }) {
 
     // Save updated cart to GunDB
     const userNode = gun.get(`user_${account}`);
-    userNode.put({ cart: newCart }, () => {
+    userNode.get('cart').put(newCart, () => {
       console.log(`Cart updated for account ${account}:`, newCart);
     });
   };
@@ -116,7 +108,7 @@ export function EthereumProvider({ children }) {
         allTokens,
         cart,
         productCount,
-        contextcars,
+        Contextcars,
         disconnectWallet,
         connectWallet,
         loadTokens,

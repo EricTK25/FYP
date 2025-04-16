@@ -158,7 +158,7 @@
       "outputs": [
         {
           "internalType": "uint256",
-          "name": "id",
+          "name": "product_id",
           "type": "uint256"
         },
         {
@@ -379,69 +379,130 @@
           "type": "uint256"
         },
         {
-          "internalType": "string",
-          "name": "_name",
-          "type": "string"
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "product_id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "category",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "image",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "cost",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint32",
+              "name": "stock",
+              "type": "uint32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "color",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "engine_power",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "fuel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "interior",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "mileage",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "condition",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "cubic_capacity",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct CarrierApp.Specification",
+              "name": "specs",
+              "type": "tuple"
+            },
+            {
+              "internalType": "string",
+              "name": "highlights",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct CarrierApp.Item",
+          "name": "_item",
+          "type": "tuple"
         },
         {
-          "internalType": "string",
-          "name": "_category",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_image",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_cost",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint32",
-          "name": "_stock",
-          "type": "uint32"
-        },
-        {
-          "internalType": "string",
-          "name": "_color",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_engine_power",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_fuel",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_interior",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_mileage",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_condition",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_cubic_capacity",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_highlights",
-          "type": "string"
+          "components": [
+            {
+              "internalType": "string",
+              "name": "color",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "engine_power",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "fuel",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "interior",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "mileage",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "condition",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "cubic_capacity",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct CarrierApp.Specification",
+          "name": "_specs",
+          "type": "tuple"
         }
       ],
       "name": "list",
@@ -492,4 +553,4 @@
       "stateMutability": "nonpayable",
       "type": "function"
     }
-  ]
+]

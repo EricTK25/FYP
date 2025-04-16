@@ -181,6 +181,11 @@ const ProfileP = () => {
                 <span>Selling Management</span>
                 <span className="arrow"> > </span>
               </Link>
+              {/* New Order History Button */}
+              <Link to="/order-history" className="option">
+                <span>Order History</span>
+                <span className="arrow"> > </span>
+              </Link>
               <div className="option" onClick={handleLogout}>
                 <span>Logout</span>
                 <span className="arrow"> > </span>

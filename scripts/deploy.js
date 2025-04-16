@@ -13,7 +13,6 @@ async function main() {
 
   console.log(`Deploying on network ID: ${networkId} with deployer: ${deployer.address}`);
 
-  // Deploy CarrierApp
   console.log("Deploying CarrierApp contract...");
   const CarrierApp = await ethers.getContractFactory("CarrierApp");
   const carrierapp = await CarrierApp.deploy();
@@ -80,21 +79,39 @@ async function main() {
 
     try {
       console.log(`Listing item ${item.id} with specification:`, spec);
+      const itemStruct = {
+        product_id: item.id, 
+        name: item.name,
+        category: item.category,
+        image: item.image,
+        cost: tokens(item.cost),
+        stock: Number(item.stock),
+        specs: { 
+          color: "",
+          engine_power: "",
+          fuel: "",
+          interior: "",
+          mileage: "",
+          condition: "",
+          cubic_capacity: "",
+        },
+        highlights: item.highlights || "",
+      };
+
+      const specStruct = {
+        color: spec.color,
+        engine_power: spec.engine_power,
+        fuel: spec.fuel,
+        interior: spec.interior,
+        mileage: spec.mileage,
+        condition: spec.condition,
+        cubic_capacity: spec.cubic_capacity,
+      };
+
       const tx = await carrierapp.connect(deployer).list(
         item.id,
-        item.name,
-        item.category,
-        item.image,
-        tokens(item.cost),
-        Number(item.stock),
-        spec.color,
-        spec.engine_power,
-        spec.fuel,
-        spec.interior,
-        spec.mileage,
-        spec.condition,
-        spec.cubic_capacity,
-        item.highlights || ""
+        itemStruct,
+        specStruct,
       );
       transactions.push(tx);
       console.log(`Listed item ${item.id}: ${item.name}, Tx: ${tx.hash}`);
@@ -103,7 +120,6 @@ async function main() {
     }
   }
 
-  // Wait for all transactions
   await Promise.all(transactions.map((tx) => tx.wait()));
   console.log("All items listed successfully!");
 }
