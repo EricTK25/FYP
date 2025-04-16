@@ -8,6 +8,7 @@ import Section from "./components/Section";
 import FooterNavigation from "./components/FooterNavigation";
 import HeroSection from "./components/HeroSection";
 import config from "./config.json";
+import "./App.css";
 
 const Buy = () => {
   const { account, contextcars, setContextcars } = useEthereum();
@@ -120,7 +121,7 @@ const Buy = () => {
   }, []);
 
   return (
-    <div>
+    <div className="App">
       <Navigation />
       <HeroSection />
       <h2>Vehicle App Best Sellers</h2>

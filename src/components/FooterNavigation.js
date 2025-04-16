@@ -18,7 +18,7 @@ function FooterNavigation() {
           <FaSearch className="icon" />
           <span className="nav-text">Search</span>
         </button>
-        <button className="nav-item" onClick={() => navigate('/sell')}>
+        <button className="nav-item" onClick={() => navigate('/mint')}>
           <MdSell className="icon" />
           <span className="nav-text">Sell</span>
         </button>
