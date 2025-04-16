@@ -47,31 +47,36 @@ const Buy = () => {
         setError("MetaMask is not installed");
         return;
       }
-  
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
       const network = await provider.getNetwork();
       const chainId = network.chainId.toString();
-  
+
       if (!config[chainId]?.CarrierApp?.address) {
         setError(`Contract not deployed on network ${chainId}`);
         return;
       }
-  
+
       const carrierapp = new ethers.Contract(
         config[chainId].CarrierApp.address,
         CarrierApp,
         provider
       );
-  
+
       const latestBlock = await provider.getBlockNumber();
       console.log("Latest block number before fetching items:", latestBlock);
-  
+
       const items = [];
       let id = 1;
-      while (true) {
+      let consecutiveErrors = 0;
+      const maxConsecutiveErrors = 10; // Increased to handle sparse IDs
+      const maxId = 1000; // Safety limit to prevent infinite loop
+      while (consecutiveErrors < maxConsecutiveErrors && id <= maxId) {
+        console.log(`Attempting to fetch item ID ${id}`);
         try {
-          const item = await carrierapp.getProduct(id);
+          const item = await carrierapp.getItemDetails(id);
+          console.log(item)
           items.push({
             id: item.product_id.toString(),
             name: item.name,
@@ -86,26 +91,31 @@ const Buy = () => {
               interior: item.specs.interior,
               mileage: item.specs.mileage,
               condition: item.specs.condition,
-              cubic_capacity: item.specs.cubic_capacity,
+              cubic_capacity: item.specs.cubic_capacity
             },
             highlights: item.highlights,
+            seller: item.seller
           });
+          console.log(`Fetched item ${id}: ${item.name}`);
+          consecutiveErrors = 0;
           id++;
         } catch (innerError) {
-          if (innerError.reason?.includes("ItemNotFound")) {
-            break;
+          if (innerError.reason?.includes("ItemNotFound") || innerError.data?.startsWith("0x1910c897")) {
+            console.log(`Item ${id} not found`);
+            consecutiveErrors++;
+          } else {
+            console.error(`Unexpected error fetching item ${id}:`, innerError.message, innerError.data);
           }
-          console.error(`Error fetching item ${id}:`, innerError);
           id++;
-          if (id > 100) break;
         }
       }
-  
+
       if (items.length === 0) {
         setError("No items found in the contract");
       } else {
         setCars(items);
-        setContextcars(items); // Sync with global context
+        setContextcars(items);
+        console.log("Fetched items:", items);
       }
     } catch (error) {
       console.error("Error loading blockchain data:", error);
@@ -129,9 +139,12 @@ const Buy = () => {
       ) : (
         <Section title={"Cars"} items={cars} cart={cart} setCart={setCart} />
       )}
+      {error && (
+        <div className="bg-red-100 text-red-700 p-4 rounded mb-4">{error}</div>
+      )}
       <FooterNavigation />
     </div>
   );
-}
+};
 
 export default Buy;

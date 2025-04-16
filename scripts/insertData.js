@@ -16,6 +16,7 @@ module.exports = [
       cubic_capacity: "None",
     },
     highlights: "Autopilot, Long Range",
+    seller: "0x0000000000000000000000000000000000000000"
   },
   {
     id: 2,
@@ -34,6 +35,7 @@ module.exports = [
       cubic_capacity: "2000 cc",
     },
     highlights: "Reliable, Fuel Efficient",
+    seller: "0x0000000000000000000000000000000000000000"
   },
   {
     id: 3,
@@ -52,6 +54,7 @@ module.exports = [
       cubic_capacity: "1800 cc",
     },
     highlights: "Affordable, Compact",
+    seller: "0x0000000000000000000000000000000000000000"
   },
   {
     id: 4,
@@ -70,6 +73,7 @@ module.exports = [
       cubic_capacity: "1600 cc",
     },
     highlights: "Economical, Basic Features",
+    seller: "0x0000000000000000000000000000000000000000"
   },
   {
     id: 5,
@@ -88,6 +92,7 @@ module.exports = [
       cubic_capacity: "1700 cc",
     },
     highlights: "Sporty, Affordable",
+    seller: "0x0000000000000000000000000000000000000000"
   },
   {
     id: 6,
@@ -106,6 +111,7 @@ module.exports = [
       cubic_capacity: "3000 cc",
     },
     highlights: "Luxury, High Performance",
+    seller: "0x0000000000000000000000000000000000000000"
   },
   {
     id: 7,
@@ -124,6 +130,7 @@ module.exports = [
       cubic_capacity: "2500 cc",
     },
     highlights: "Luxury, Sporty",
+    seller: "0x0000000000000000000000000000000000000000"
   },
   {
     id: 8,
@@ -142,6 +149,7 @@ module.exports = [
       cubic_capacity: "2200 cc",
     },
     highlights: "Reliable, Durable",
+    seller: "0x0000000000000000000000000000000000000000"
   },
   {
     id: 9,
@@ -160,5 +168,6 @@ module.exports = [
       cubic_capacity: "2800 cc",
     },
     highlights: "Luxury, High Tech",
+    seller: "0x0000000000000000000000000000000000000000"
   },
 ];

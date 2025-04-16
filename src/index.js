@@ -13,6 +13,7 @@ import { EthereumProvider } from './EthereumContext';
 import ProductDetail from './components/Product';
 import Checkout from './Checkout';
 import OrderHistory from './OrderHistory';
+import Sell from './Sell';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
   {
     path:"/Order-History",
     element:<OrderHistory/>
+  },
+  {
+    path:"/Sell",
+    element:<Sell/>
   }
 ]);
 

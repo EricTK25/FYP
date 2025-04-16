@@ -6,5 +6,13 @@
     "DocumentRegistry": {
       "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
     }
+  },
+  "11155111": {
+    "CarrierApp": {
+      "address": "0x88e93Be37f05a0bE49d43D414B9Af60A2b1c77A8"
+    },
+    "DocumentRegistry": {
+      "address": "0x91426FDEa6680224A9f30937e7792928e809D30c"
+    }
   }
 }

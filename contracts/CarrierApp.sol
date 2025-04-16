@@ -1,9 +1,9 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 contract CarrierApp {
     address public immutable owner;
+    uint256 private nextId = 1; // Tracks next available product ID
 
     struct Specification {
         string color;
@@ -24,6 +24,7 @@ contract CarrierApp {
         uint32 stock;
         Specification specs;
         string highlights;
+        address seller;
     }
 
     struct Order {
@@ -36,7 +37,7 @@ contract CarrierApp {
     mapping(address => mapping(uint256 => Order)) private orders;
 
     event Buy(address indexed buyer, uint256 orderId, uint256 itemId);
-    event List(uint256 indexed id, string name, uint256 cost, uint32 stock);
+    event List(uint256 indexed id, string name, uint256 cost, uint32 stock, address indexed seller);
     event Update(uint256 indexed id, uint256 cost, uint32 stock);
 
     error InsufficientPayment(uint256 sent, uint256 required);
@@ -44,6 +45,7 @@ contract CarrierApp {
     error ItemNotFound(uint256 id);
     error NotOwner();
     error WithdrawalFailed();
+    error InvalidItemData();
 
     constructor() {
         owner = msg.sender;
@@ -54,26 +56,37 @@ contract CarrierApp {
         _;
     }
 
-    // Refactored list function to use structs for parameters
+    // Returns the next available ID and increments the counter
+    function getNextId() external returns (uint256) {
+        uint256 id = nextId;
+        nextId++;
+        return id;
+    }
+
+    // Modified list function to allow optional ID input
     function list(
-        uint256 _id,
+        uint256 _id, // 0 means use nextId
         Item calldata _item,
         Specification calldata _specs
-    ) external onlyOwner {
-        if (_id == 0 || items[_id].product_id != 0) revert ItemNotFound(_id);
+    ) external {
+        uint256 productId = _id == 0 ? nextId++ : _id;
+        if (productId == 0 || items[productId].product_id != 0) revert ItemNotFound(productId);
+        if (_item.cost == 0 || _item.stock == 0) revert InvalidItemData();
+        if (bytes(_item.name).length == 0 || bytes(_item.category).length == 0) revert InvalidItemData();
 
-        items[_id] = Item({
-            product_id: _id,
+        items[productId] = Item({
+            product_id: productId,
             name: _item.name,
             category: _item.category,
             image: _item.image,
             cost: _item.cost,
             stock: _item.stock,
             specs: _specs,
-            highlights: _item.highlights
+            highlights: _item.highlights,
+            seller: msg.sender
         });
 
-        emit List(_id, _item.name, _item.cost, _item.stock);
+        emit List(productId, _item.name, _item.cost, _item.stock, msg.sender);
     }
 
     function update(uint256 _id, uint256 _cost, uint32 _stock) external onlyOwner {
@@ -98,9 +111,12 @@ contract CarrierApp {
 
         orders[msg.sender][orderCount[msg.sender]] = Order(block.timestamp, _id);
 
+        (bool success, ) = item.seller.call{value: item.cost}("");
+        if (!success) revert WithdrawalFailed();
+
         if (msg.value > item.cost) {
-            (bool success, ) = msg.sender.call{value: msg.value - item.cost}("");
-            if (!success) revert WithdrawalFailed();
+            (bool refundSuccess, ) = msg.sender.call{value: msg.value - item.cost}("");
+            if (!refundSuccess) revert WithdrawalFailed();
         }
 
         emit Buy(msg.sender, orderCount[msg.sender], _id);
@@ -125,7 +141,8 @@ contract CarrierApp {
         uint256 cost,
         uint32 stock,
         Specification memory specs,
-        string memory highlights
+        string memory highlights,
+        address seller
     ) {
         Item memory item = items[_id];
         if (item.product_id == 0) revert ItemNotFound(_id);
@@ -137,7 +154,8 @@ contract CarrierApp {
             item.cost,
             item.stock,
             item.specs,
-            item.highlights
+            item.highlights,
+            item.seller
         );
     }
 

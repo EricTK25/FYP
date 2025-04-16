@@ -9,15 +9,16 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.6.1",
+    "alchemy-sdk": "^3.5.6",
     "buffer": "^6.0.3",
     "carriarsaledapp": "file:",
     "CarrierApp": "file:",
     "cors": "^2.8.5",
     "cra-template": "1.2.0",
-    "dotenv": "^16.4.7",
     "ethers": "^6.13.5",
     "express": "^4.21.2",
     "gun": "^0.2020.1240",
+    "gun-server": "^1.0.0",
     "hardhat": "^2.22.18",
     "ipfs-http-client": "^60.0.1",
     "jspdf": "^3.0.1",
@@ -30,7 +31,8 @@
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1",
     "web-vitals": "^4.2.4",
-    "web3": "^4.16.0"
+    "web3": "^4.16.0",
+    "ws": "^8.18.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -55,5 +57,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "dotenv": "^16.5.0"
   }
 }
