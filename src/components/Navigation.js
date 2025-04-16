@@ -25,9 +25,6 @@ function Navigation() {
         <div className="Navigation">
             <div className="navbar">
                 <span className="app-title">Vehicle App</span>
-                <Link to="/mint">Mint</Link>
-                <Link to="/allTokens">AllTokens</Link>&nbsp;&nbsp;
-                <Link to="/Buy">Buy</Link>
                 {account ? (
                     <span>Connected: {account.slice(0,6)}...{account.slice(-4)}</span>
                 ) : (

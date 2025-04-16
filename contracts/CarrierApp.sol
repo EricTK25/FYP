@@ -16,7 +16,7 @@ contract CarrierApp {
     }
 
     struct Item {
-        uint256 id;
+        uint256 product_id;
         string name;
         string category;
         string image;
@@ -119,7 +119,7 @@ contract CarrierApp {
             if (!refundSuccess) revert WithdrawalFailed();
         }
 
-        emit Buy(msg.sender, orderCount[msg.sender], item.id);
+        emit Buy(msg.sender, orderCount[msg.sender], item.product_id);
     }
 
     function withdraw() external onlyOwner {

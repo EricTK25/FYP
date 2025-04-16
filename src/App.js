@@ -1,85 +1,135 @@
-import React, { useState, useEffect } from "react";
 import "./App.css"; // Make sure to create a CSS file for styling
 import { ethers } from "ethers";
-import config from "./config";
-// Components
-import Navigation from './components/Navigation';
-import HeroSection from "./components/HeroSection";
-import FooterNavigation from "./components/FooterNavigation";
-import Section from "./components/Section";
-// ABIs
+import React, { useState, useEffect, useRef } from "react";
+import Gun from "gun";
+import { useEthereum } from "./EthereumContext";
 import CarrierApp from "./abis/CarrierApp.json";
+import Navigation from "./components/Navigation";
+import Section from "./components/Section";
+import FooterNavigation from "./components/FooterNavigation";
+import HeroSection from "./components/HeroSection";
+import config from "./config.json";
 
 function App() {
-  const [cars, setCars] = useState([]);
+  const { account, contextcars, setContextcars } = useEthereum();
+  const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [acc, setAccount] = useState(null);
-    const [provider, setProvider] = useState(null);
-    const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filteredCars, setFilteredCars] = useState([]);
-    const [dailyHighlights, setDailyHighlights] = useState([]);
-    const [cart, setCart] = useState([]);
+  const [cars, setCars] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [error, setError] = useState(null);
 
-  // Simulate fetching car data based on tokenId
-  const fetchCars = async () => {
-    setLoading(true);
-
-    // Simulate fetching data
-    const carData = [
-      {
-        tokenId: 1,
-        name: "car",
-        price: 1488,
-        image: "https://via.placeholder.com/150",
-      },
-      {
-        tokenId: 2,
-        name: "ship",
-        price: 888,
-        image: "https://via.placeholder.com/150",
-      },
-      {
-        tokenId: 3,
-        name: "boat",
-        price: 849,
-        image: "https://via.placeholder.com/150",
-      },
-      {
-        tokenId: 4,
-        name: "piko",
-        price: 693,
-        image: "https://via.placeholder.com/150",
-      },
-      {
-        tokenId: 5,
-        name: "GTR",
-        price: 469,
-        image: "https://via.placeholder.com/150",
-      },
-      {
-        tokenId: 6,
-        name: "AE86",
-        price: 450,
-        image: "https://via.placeholder.com/150",
-      },
-    ];
-
-    // Simulate delay (e.g., blockchain call)
-    setTimeout(() => {
-      setCars(carData);
-      setLoading(false);
-    }, 2000);
-  };
-
-  useEffect(() => {
-    fetchCars();
-  }, []);
+  const gunRef = useRef(null);
+  if (!gunRef.current) {
+    gunRef.current = Gun();
+  }
+  const gun = gunRef.current;
+ const loadBlockchainData = async () => {
+     try {
+       if (!window.ethereum) {
+         setError("MetaMask is not installed");
+         return;
+       }
+ 
+       const provider = new ethers.BrowserProvider(window.ethereum);
+       //setProvider(provider);
+       const network = await provider.getNetwork();
+       const chainId = network.chainId.toString();
+ 
+       if (!config[chainId]?.CarrierApp?.address) {
+         setError(`Contract not deployed on network ${chainId}`);
+         return;
+       }
+ 
+       const carrierapp = new ethers.Contract(
+         config[chainId].CarrierApp.address,
+         CarrierApp,
+         provider
+       );
+ 
+       const latestBlock = await provider.getBlockNumber();
+       console.log("Latest block number before fetching items:", latestBlock);
+ 
+       const items = [];
+       let id = 1;
+       let consecutiveErrors = 0;
+       const maxConsecutiveErrors = 10; // Increased to handle sparse IDs
+       const maxId = 1000; // Safety limit to prevent infinite loop
+       while (consecutiveErrors < maxConsecutiveErrors && id <= maxId) {
+         console.log(`Attempting to fetch item ID ${id}`);
+         try {
+           const item = await carrierapp.getItemDetails(id);
+           console.log(item)
+           items.push({
+             id: item.product_id.toString(),
+             name: item.name,
+             category: item.category,
+             image: item.image,
+             cost: ethers.formatUnits(item.cost.toString(), "ether"),
+             stock: item.stock.toString(),
+             specification: {
+               color: item.specs.color,
+               engine_power: item.specs.engine_power,
+               fuel: item.specs.fuel,
+               interior: item.specs.interior,
+               mileage: item.specs.mileage,
+               condition: item.specs.condition,
+               cubic_capacity: item.specs.cubic_capacity
+             },
+             highlights: item.highlights,
+             seller: item.seller
+           });
+           console.log(`Fetched item ${id}: ${item.name}`);
+           consecutiveErrors = 0;
+           id++;
+         } catch (innerError) {
+           if (innerError.reason?.includes("ItemNotFound") || innerError.data?.startsWith("0x1910c897")) {
+             console.log(`Item ${id} not found`);
+             consecutiveErrors++;
+           } else {
+             console.error(`Unexpected error fetching item ${id}:`, innerError.message, innerError.data);
+           }
+           id++;
+         }
+       }
+   
+       setCars(items);
+       if(contextcars===null){
+         setContextcars(items);
+       }
+     } catch (error) {
+       console.error("Error loading blockchain data:", error);
+       //setError("Failed to load data from blockchain");
+     } finally {
+       setLoading(false);
+     }
+   };
+ 
+   useEffect(() => {
+     if (account) {
+       const userNode = gun.get(`user_${account}`);
+       userNode.get("cart").once((cartData) => {
+         if (cartData) {
+           const cartArray = Object.keys(cartData)
+             .filter((key) => key.startsWith("item_"))
+             .map((key) => cartData[key]);
+           setCart(cartArray);
+           console.log(`Loaded cart for account ${account}:`, cartArray);
+         } else {
+           console.log(`No cart data found for account ${account}. Initializing an empty cart.`);
+           setCart([]);
+         }
+       });
+     }
+   }, [account, gun]);
+ 
+   useEffect(() => {
+     loadBlockchainData();
+   }, []);
 
   return (
     <div className="App">
       {/* Navbar */}
-      <Navigation account={acc} setAccount={setAccount} />
+     <Navigation/>
       {/* Hero Section  */}
       <HeroSection/>
       {/* Top Sellers Section */}
@@ -88,14 +138,11 @@ function App() {
         {loading ? (
           <p>Loading cars...</p>
         ) : (
-          cars.map((car) => (
-            <div key={car.tokenId} className="car-card">
-              <img src={car.image} alt={car.name} className="car-image" />
-              <h4>{car.name}</h4>
-              <p>{car.price} ETH</p>
-              <button className="add-to-cart">purchase</button>
-            </div>
-          ))
+          <Section
+          items={cars}
+          cart={cart}
+          setCart={setCart}
+        />
         )}
       </div>
 
