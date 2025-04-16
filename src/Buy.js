@@ -1,35 +1,28 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import Gun from "gun";
-import { useEthereum } from "./EthereumContext"; // Import EthereumContext globally
 import { useEthereum } from "./EthereumContext";
-
-// ABIs
 import CarrierApp from "./abis/CarrierApp.json";
-
-// Components
 import Navigation from "./components/Navigation";
 import Section from "./components/Section";
 import FooterNavigation from "./components/FooterNavigation";
 import HeroSection from "./components/HeroSection";
-
-// Config
 import config from "./config.json";
 
 const Buy = () => {
-  const { account , contextcars, setContextcars} = useEthereum(); 
+  const { account, contextcars, setContextcars } = useEthereum();
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cars, setCars] = useState([]);
   const [cart, setCart] = useState([]);
   const [error, setError] = useState(null);
 
+  const gunRef = useRef(null);
   if (!gunRef.current) {
     gunRef.current = Gun();
   }
   const gun = gunRef.current;
 
-  // Load cart data from GunDB when the wallet connects
   useEffect(() => {
     if (account) {
       const userNode = gun.get(`user_${account}`);
@@ -48,7 +41,6 @@ const Buy = () => {
     }
   }, [account, gun]);
 
-  // Load blockchain data (vehicles and metadata)
   const loadBlockchainData = async () => {
     try {
       if (!window.ethereum) {
@@ -98,11 +90,11 @@ const Buy = () => {
           id++;
         } catch (innerError) {
           if (innerError.reason?.includes("ItemNotFound")) {
-            break; // Stop when no more items exist
+            break;
           }
           console.error(`Error fetching item ${id}:`, innerError);
           id++;
-          if (id > 100) break; // Safety limit to prevent infinite loops
+          if (id > 100) break;
         }
       }
 
@@ -118,6 +110,7 @@ const Buy = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     loadBlockchainData();
   }, []);
@@ -132,12 +125,7 @@ const Buy = () => {
       ) : error ? (
         <p style={{ color: "red" }}>{error}</p>
       ) : (
-        <Section
-          title={"Cars"}
-          items={cars}
-          cart={cart}
-          setCart={setCart}
-        />
+        <Section title={"Cars"} items={cars} cart={cart} setCart={setCart} />
       )}
       <FooterNavigation />
     </div>

@@ -95,7 +95,7 @@ module.exports = [
     category: "Car",
     image: "https://purepng.com/public/uploads/large/purepng.com-jaguar-e-type-coupe-carcarvehicletransportjaguar-961524666464d2lcd.png",
     cost: "1.25",
-    stock: 0,
+    stock: 1,
     specification: {
       color: "Black",
       engine_power: "300 HP",
@@ -131,7 +131,7 @@ module.exports = [
     category: "Car",
     image: "https://purepng.com/public/uploads/large/purepng.com-fordfordcarfodr-carvehicle-1701527484491zugjq.png",
     cost: "0.2",
-    stock: 0,
+    stock: 1,
     specification: {
       color: "White",
       engine_power: "200 HP",

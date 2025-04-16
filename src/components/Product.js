@@ -17,9 +17,10 @@ function ProductDetail() {
   const [notification, setNotification] = useState({ visible: false, message: "" });
   const [isBuying, setIsBuying] = useState(false);
   const [itemData, setItemData] = useState(null);
+  const [order, setOrder] = useState(null);
+  const [hasBought, setHasBought] = useState(false);
 
   useEffect(() => {
-    console.log("Location state specification:", specification); // Debug navigation data
     const loadBlockchainData = async () => {
       try {
         if (!window.ethereum) {
@@ -49,7 +50,7 @@ function ProductDetail() {
           try {
             const item = await carrierapp.getProduct(id);
             const specs = item.specs;
-            console.log("Fetched item specification:", specs); // Debug contract data
+            console.log("Fetched item specification:", specs);
             setItemData({
               id: item.product_id.toString(),
               name: item.name,
@@ -81,6 +82,34 @@ function ProductDetail() {
     loadBlockchainData();
   }, [id]);
 
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!carrierapp || !window.ethereum.selectedAddress) {
+        console.error("Carrier app or account not defined");
+        return;
+      }
+
+      const account = window.ethereum.selectedAddress;
+      try {
+        const events = await carrierapp.queryFilter("Buy");
+        const orders = events.filter(
+          (event) =>
+            event.args.buyer.toLowerCase() === account.toLowerCase() &&
+            event.args.itemId.toString() === id.toString()
+        );
+
+        if (orders.length === 0) return;
+
+        const order = await carrierapp.orders(account, orders[0].args.orderId);
+        setOrder(order);
+      } catch (err) {
+        console.error("Error fetching order details:", err);
+      }
+    };
+
+    fetchDetails();
+  }, [carrierapp, id, hasBought]);
+
   const handleBuy = async () => {
     if (!carrierapp || !provider) {
       setNotification({ visible: true, message: "Blockchain not initialized" });
@@ -103,6 +132,7 @@ function ProductDetail() {
         value: ethers.parseEther(itemData?.cost || cost),
       });
       await tx.wait();
+      setHasBought(true);
       setNotification({ visible: true, message: `Successfully purchased ${name}!` });
       setTimeout(() => navigate("/buy"), 3000);
     } catch (err) {
@@ -128,36 +158,6 @@ function ProductDetail() {
       </div>
     );
   }
-
-  const fetchDetails = async () => {
-    if (!carrierapp) {
-      console.error("Carrier app instance is not defined");
-      return;
-    }
-
-    const events = await carrierapp.queryFilter("Buy");
-    const orders = events.filter(
-      (event) => event.args.buyer === account && event.args.itemId.toString() === id.toString()
-    );
-
-    if (orders.length === 0) return;
-
-    const order = await carrierapp.orders(account, orders[0].args.orderId);
-    setOrder(order);
-  };
-
-  const buyHandler = async () => {
-    const signer = await provider.getSigner();
-
-    let transaction = await carrierapp.connect(signer).buy(id, { value: cost });
-    await transaction.wait();
-
-    setHasBought(true);
-  };
-
-  useEffect(() => {
-    fetchDetails();
-  }, [hasBought]);
 
   return (
     <div className="product-detail">
@@ -202,21 +202,20 @@ function ProductDetail() {
           <button
             className="buy-button"
             onClick={handleBuy}
-            disabled={isBuying || (displayData.stock === "0")}
+            disabled={isBuying || displayData.stock === "0"}
           >
             {isBuying ? "Processing..." : "Buy Now"}
           </button>
         </div>
-        <button className="buy-button" onClick={buyHandler}>Purchase Now</button>
       </div>
       {notification.visible && (
         <div className="notification" role="alert">
           {notification.message}
         </div>
       )}
-      <FooterNavigation></FooterNavigation>
+      <FooterNavigation />
     </div>
-  )
+  );
 }
 
 export default ProductDetail;
