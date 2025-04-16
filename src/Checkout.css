@@ -1,0 +1,138 @@
+<<<<<<< Updated upstream
+=======
+.checkout-page {
+  background-color: #1a1a1a;
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  }
+  
+  .checkout-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .checkout-page h2 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem); /* Scales between 1.5rem and 2rem */
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+  
+  .checkout-content {
+  display: flex;
+  justify-content: space-between;
+  }
+  
+  .checkout-info {
+  flex: 1;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-right: 20px;
+  }
+  
+  .checkout-info h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  }
+
+  .checkout-info {
+    display: flex;
+    align-items: center;
+    background-color: #2a2a2a;
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .checkout-item__image {
+    width: clamp(100px, 20vw, 150px); /* Scales image width */
+    height: auto;
+    margin-right: 1rem;
+    border-radius: 4px;
+  }
+  
+  .checkout-item__details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .checkout-item-title {
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  .checkout-item-cost {
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+    color: #ccc;
+  }
+  
+  .checkout-item-remove {
+    background-color: #f5c518;
+    color: #000;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    align-self: flex-start;
+  }
+
+  .checkout-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  }
+  
+  .checkout-item__image {
+  flex: 0 0 80px;
+  margin-right: 20px;
+  }
+  
+  .checkout-item__image img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  }
+  
+  .checkout-item__info h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  }
+  
+  .checkout-item__info p {
+  font-size: 14px;
+  }
+  
+  .Purchase-btn {
+  background-color: #f4c20d;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 20px;
+  }
+  
+  .Purchase-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  }
+  
+ 
+>>>>>>> Stashed changes
