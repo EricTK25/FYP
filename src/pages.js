@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useEthereum } from './EthereumContext';
+import FooterNavigation from "./components/FooterNavigation";
+import Navigation from './components/Navigation';
+import "./page.css";
 const Gun = require('gun');
-import config from './config.json';
-import CarrierApp from './abis/CarrierApp.json';
+const insertData = require('./config/insertData.js');
+
 
 export function AllTokens() {
     const { allTokens, loadTokens } = useEthereum();
@@ -73,217 +76,145 @@ export function MintToken() {
         }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-
-        if (!account) {
-            alert('Please connect your wallet first!');
-            return;
-        }
-
-        if (!carrierApp || !provider) {
-            setError('Blockchain not initialized');
-            return;
-        }
-
-        try {
-            setIsSubmitting(true);
-
-            const signer = await provider.getSigner();
-            const contractWithSigner = carrierApp.connect(signer);
-
-            const itemStruct = {
-                product_id: 0, // Ignored by contract; ID is auto-generated
-                name: formData.carrierName,
-                category: formData.carrierType,
-                image: 'https://purepng.com/public/uploads/large/black-edition-audi-luxury-car-1nm.png',
-                cost: ethers.parseEther(formData.price.toString()),
-                stock: 1,
-                highlights: `Registration: ${formData.registrationNumber}, Year: ${formData.year}`
-            };
-
-            const specStruct = {
-                color: "Black",
-                engine_power: "200 HP",
-                fuel: "Petrol",
-                interior: "Leather",
-                mileage: "0 km",
-                condition: "New",
-                cubic_capacity: "2.0L"
-            };
-
-            const tx = await contractWithSigner.list(itemStruct, specStruct);
-            const receipt = await tx.wait();
-            
-            // Extract product_id from List event
-            const listEvent = receipt.logs
-                .map(log => {
-                    try {
-                        return contractWithSigner.interface.parseLog(log);
-                    } catch {
-                        return null;
-                    }
-                })
-                .find(log => log && log.name === 'List');
-            const productId = listEvent ? listEvent.args.id.toString() : Date.now().toString();
-
-            // Insert into Gun.js
-            await insertIntoGun({
-                id: productId,
-                name: formData.carrierName,
-                category: formData.carrierType,
-                image: itemStruct.image,
-                cost: formData.price.toString(),
-                stock: "1",
-                specification: specStruct,
-                highlights: itemStruct.highlights
-            });
-
-            // Update contextcars
-            setItemToContextcars({
-                id: productId,
-                name: formData.carrierName,
-                category: formData.carrierType,
-                image: itemStruct.image,
-                cost: formData.price.toString(),
-                stock: "1",
-                specification: specStruct,
-                highlights: itemStruct.highlights
-            });
-
-            // Reset form
-            setFormData({
-                carrierName: '',
-                registrationNumber: '',
-                price: 0,
-                year: new Date().getFullYear()
-            });
-
-            alert('Carrier Token created successfully!');
-        } catch (err) {
-            console.error('Contract call failed:', err);
-            setError(err.reason || err.message || 'Failed to create carrier');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const insertIntoGun = (item) => {
-        return new Promise((resolve, reject) => {
-            const gun = Gun({ peers: ['http://localhost:8765/gun'] });
-            gun.get('carrierlist').get(item.id).put(item, (ack) => {
-                if (ack.err) {
-                    console.error(`Error inserting item ${item.id}:`, ack.err);
-                    reject(ack.err);
-                } else {
-                    console.log(`Inserted product ID ${item.id}: ${item.name}`);
-                    resolve();
-                }
-            });
-        });
-    };
+    const CreateCarrierToBuyList = async () => {
+      const item = {
+        product_id: insertData.length + productCount,
+        product_name: formData.carrierName,
+        product_category: formData.carrierType,
+        product_image: 'https://purepng.com/public/uploads/large/black-edition-audi-luxury-car-1nm.png',
+        cost: Number(ethers.parseEther(formData.price.toString())),
+        stock: 1,
+        specification: {
+          color: "Black",
+          engine_power: "280 HP",
+          fuel: "Petrol",
+          interior: "Leather",
+          mileage: "21 MPG",
+          condition: "New",
+          cubic_capacity: "2800 cc",
+        },
+        highlights: "Luxury, High Tech"
+      };
+      setProductCount(productCount + 1);
+      const gun = Gun({ peers: ['http://localhost:8765/gun'] });
+      gun.get('carrierlist').get(item.product_id).put(item, (ack) => {
+        if (ack.err)
+          console.error('Error inserting item:', ack.err);
+        else 
+          console.log(`Inserted product ID ${item.product_id}: ${item.product_name}`);
+      });
+      setItemToContextcars(item);
+    }
 
     const setItemToContextcars = (item) => {
-        const cars = [...contextcars];
-        cars.push({
-            id: item.id,
-            name: item.name,
-            cost: item.cost,
-            image: item.image,
-            stock: item.stock,
-            category: item.category,
-            specification: item.specification,
-            highlights: item.highlights
-        });
-        setContextcars(cars);
-    };
-
+      const cars = contextcars;
+      cars.push({
+        id: item.product_id.toString(),
+        name: item.product_name,
+        cost: ethers.formatUnits(item.cost.toString(), "ether"),
+        image: item.product_image,
+        stock: item.stock.toString(),
+        category: item.product_category,
+        specification: {
+          color: item.specification.color,
+          engine_power: item. specification.engine_power,
+          fuel: item.specification.fuel,
+          interior: item.specification.interior,
+          mileage: item.specification.mileage,
+          condition: item.specification.condition,
+          cubic_capacity: item.specification.cubic_capacity,
+        },
+        highlights: item.highlights
+      });
+      setContextcars(cars);
+    }
+  
     return (
-        <div className="carrier-form">
-            <h2>Create New Carrier</h2>
-
-            {account && <p>Connected Account: {account}</p>}
-
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Carrier Name:</label>
-                    <input
-                        type="text"
-                        name="carrierName"
-                        value={formData.carrierName}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Carrier Type:</label>
-                    <select
-                        name="carrierType"
-                        value={formData.carrierType}
-                        onChange={handleInputChange}
-                        required
-                    >
-                        <option value="car">Car</option>
-                        <option value="boat">Boat</option>
-                        <option value="plane">Plane</option>
-                    </select>
-                </div>
-
-                <div className="form-group">
-                    <label>Registration Number:</label>
-                    <input
-                        type="text"
-                        name="registrationNumber"
-                        value={formData.registrationNumber}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Price (ETH):</label>
-                    <input
-                        type="number"
-                        name="price"
-                        value={formData.price}
-                        onChange={handleInputChange}
-                        min="0"
-                        step="0.01"
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Year:</label>
-                    <input
-                        type="number"
-                        name="year"
-                        value={formData.year}
-                        onChange={handleInputChange}
-                        min="1900"
-                        max={new Date().getFullYear()}
-                        required
-                    />
-                </div>
-
-                {error && <div className="error-message">{error}</div>}
-
-                <button 
-                    type="submit" 
-                    disabled={!account || isSubmitting || !carrierApp}
-                >
-                    {isSubmitting ? 'Processing...' : 'Create Carrier Token'}
-                </button>
-            </form>
-
-            {!account && (
-                <div className="wallet-warning">
-                    <p>Please connect your wallet first!</p>
-                </div>
-            )}
-        </div>
+      <div>  
+        <Navigation />
+        <FooterNavigation />
+ <div class="carrier-form-container">
+  <div class="carrier-form">
+    <div class="form-header">
+      <h2>Sell Your Carrier</h2>
+      <h3>Please enter the details of your carrier</h3>
+    </div>
+    <form onSubmit={handleSubmit}>
+      <div class="form-group">
+        <label>Carrier Name:</label>
+        <input
+          type="text"
+          name="carrierName"
+          value={formData.carrierName}
+          onChange={handleInputChange}
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label>Carrier Type:</label>
+        <select
+          name="carrierType"
+          value={formData.carrierType}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="car">Car</option>
+          <option value="boat">Boat</option>
+          <option value="plane">Plane</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Registration Number:</label>
+        <input
+          type="text"
+          name="registrationNumber"
+          value={formData.registrationNumber}
+          onChange={handleInputChange}
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label>Price (ETH):</label>
+        <input
+          type="number"
+          name="price"
+          value={formData.price}
+          onChange={handleInputChange}
+          min="0"
+          step="0.01"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label>Year:</label>
+        <input
+          type="number"
+          name="year"
+          value={formData.year}
+          onChange={handleInputChange}
+          min="1900"
+          max={new Date().getFullYear()}
+          required
+        />
+      </div>
+      {error && <div class="error-message">{error}</div>}
+      <div class="form-actions">
+        <button
+          type="submit"
+          disabled={!account || isSubmitting}
+        >
+          {isSubmitting ? 'Processing...' : 'Create Carrier Token'}
+        </button>
+      </div>
+    </form>
+    {!account && (
+      <div class="wallet-warning">
+        <p>Please connect your wallet first!</p>
+      </div>
+    )}
+  </div>
+</div>
+      </div>
     );
 }
 

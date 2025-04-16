@@ -5,7 +5,7 @@ import { useEthereum } from "../EthereumContext";
 import "../App.css";
 
 const Section = ({ title, items, cart, setCart }) => {
-  const { account } = useEthereum();
+  const { account, contextcars } = useEthereum();
   const navigate = useNavigate();
   const gunRef = useRef(null);
   const [notification, setNotification] = useState({ visible: false, message: "" });
@@ -94,7 +94,7 @@ const Section = ({ title, items, cart, setCart }) => {
         <p>No vehicles available.</p>
       ) : (
         <div className="cards">
-          {items.map((item) => (
+          {contextcars.map((item) => (
             <div
               className="card"
               key={item.id}

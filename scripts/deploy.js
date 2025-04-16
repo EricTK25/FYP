@@ -1,6 +1,9 @@
 const hre = require("hardhat");
 const config = require("../src/config.json");
 const fs = require("fs");
+const insertData = require("../src/config/insertData.js");
+
+const tokens = (n) => ethers.parseUnits(n.toString(), "ether");
 
 async function main() {
   // Get deployer account and network ID

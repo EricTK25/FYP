@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from "react";
 import "./App.css"; // Make sure to create a CSS file for styling
-
+import { ethers } from "ethers";
+import config from "./config";
 // Components
 import Navigation from './components/Navigation';
 import HeroSection from "./components/HeroSection";
 import FooterNavigation from "./components/FooterNavigation";
-
+import Section from "./components/Section";
+// ABIs
+import CarrierApp from "./abis/CarrierApp.json";
 
 function App() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [acc, setAccount] = useState(null);
+    const [provider, setProvider] = useState(null);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredCars, setFilteredCars] = useState([]);
+    const [dailyHighlights, setDailyHighlights] = useState([]);
+    const [cart, setCart] = useState([]);
 
   // Simulate fetching car data based on tokenId
   const fetchCars = async () => {
@@ -63,7 +72,6 @@ function App() {
     }, 2000);
   };
 
-
   useEffect(() => {
     fetchCars();
   }, []);
@@ -80,14 +88,11 @@ function App() {
         {loading ? (
           <p>Loading cars...</p>
         ) : (
-          cars.map((car) => (
-            <div key={car.tokenId} className="car-card">
-              <img src={car.image} alt={car.name} className="car-image" />
-              <h3>{car.name}</h3>
-              <p>${car.price}</p>
-              <button className="add-to-cart">purchase</button>
-            </div>
-          ))
+          <Section
+          items={dailyHighlights}
+          cart={cart}
+          setCart={setCart}
+        />
         )}
       </div>
 
