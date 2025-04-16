@@ -85,6 +85,9 @@ const Cart = ({ onRemoveFromCart, onCheckout }) => {
       <div className="cart-page">
         <div className="cart-container">
           <h2 className="cart-title">Your Shopping Cart ({cart.length} Item{cart.length !== 1 ? "s" : ""})</h2>
+          {
+            console.log("cart", cart)
+          }
           {cart.length === 0 ? (
             <div className="cart-empty">
               <p>Your cart is empty. Add some products to continue!</p>

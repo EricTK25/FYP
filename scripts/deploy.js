@@ -2,7 +2,7 @@ const hre = require("hardhat");
 const Gun = require("gun");
 const config = require("../src/config.json");
 const fs = require("fs");
-const insertData = require("./insertData.js");
+const insertData = require("../src/config/insertData.js");
 
 const tokens = (n) => ethers.parseUnits(n.toString(), "ether");
 

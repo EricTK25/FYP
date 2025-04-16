@@ -94,9 +94,6 @@ const Section = ({ title, items, cart, setCart }) => {
         <p>No vehicles available.</p>
       ) : (
         <div className="cards">
-          {
-            console.log("contextcars",contextcars)
-          }
           {contextcars.map((item) => (
             <div
               className="card"

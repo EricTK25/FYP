@@ -5,7 +5,7 @@ import FooterNavigation from "./components/FooterNavigation";
 import Navigation from './components/Navigation';
 import "./page.css";
 const Gun = require('gun');
-const insertData = require('./Config/insertData.js');
+const insertData = require('./config/insertData.js');
 
 
 export function AllTokens() {
@@ -94,6 +94,16 @@ export function MintToken() {
         product_image: 'https://purepng.com/public/uploads/large/black-edition-audi-luxury-car-1nm.png',
         cost: Number(ethers.parseEther(formData.price.toString())),
         stock: 1,
+        specification: {
+          color: "Black",
+          engine_power: "280 HP",
+          fuel: "Petrol",
+          interior: "Leather",
+          mileage: "21 MPG",
+          condition: "New",
+          cubic_capacity: "2800 cc",
+        },
+        highlights: "Luxury, High Tech"
       };
       setProductCount(productCount + 1);
       const gun = Gun({ peers: ['http://localhost:8765/gun'] });
@@ -114,7 +124,17 @@ export function MintToken() {
         cost: ethers.formatUnits(item.cost.toString(), "ether"),
         image: item.product_image,
         stock: item.stock.toString(),
-        category: item.product_category
+        category: item.product_category,
+        specification: {
+          color: item.specification.color,
+          engine_power: item. specification.engine_power,
+          fuel: item.specification.fuel,
+          interior: item.specification.interior,
+          mileage: item.specification.mileage,
+          condition: item.specification.condition,
+          cubic_capacity: item.specification.cubic_capacity,
+        },
+        highlights: item.highlights
       });
       setContextcars(cars);
     }
