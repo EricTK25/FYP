@@ -167,26 +167,6 @@ const ProfileP = () => {
             <p>Email: {profile.email}</p>
             <p>Phone: {profile.phoneNumber}</p>
             <p>Shipping Address: {profile.shippingAddress || "Have not entered shipping address yet"}</p>
-
-  {/* Orders Section */}
-  <section className="orders-section">
-        <h2 className="title">My Orders</h2>
-        <div className="underline"></div>
-        <div className="orders">
-          <div className="order">
-            <i className="order-icon">💳</i>
-            <p>Pending Payment</p>
-          </div>
-          <div className="order">
-            <i className="order-icon">🚚</i>
-            <p>Delivered</p>
-          </div>
-          <div className="order">
-            <i className="order-icon">📄</i>
-            <p>Processing</p>
-          </div>
-        </div>
-      </section>
             <section className="options-section">
               <div className="option" onClick={toggleEdit}>
                 <span>Edit Profile</span>

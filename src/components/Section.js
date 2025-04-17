@@ -6,7 +6,7 @@ import { useCart } from "../CartContext"; // Import the cart context
 import "../App.css";
 
 const Section = ({ title, items }) => {
-  const { account } = useEthereum();
+  const { account, contextcars} = useEthereum();
   const { cart, setCart } = useCart(); // Use cart context
   const navigate = useNavigate();
   const gunRef = useRef(null);
@@ -85,7 +85,7 @@ const Section = ({ title, items }) => {
         <p>No vehicles available.</p>
       ) : (
         <div className="cards">
-          {items.map((item) => (
+          {contextcars.map((item) => (
             <div
               className="card"
               key={item.id}
